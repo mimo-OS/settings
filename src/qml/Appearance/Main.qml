@@ -34,6 +34,10 @@ ItemPage {
         id: appearance
     }
 
+    IconThemeModel {
+        id: iconThemeModel
+    }
+
     FontsModel {
         id: fontsModel
     }
@@ -200,6 +204,51 @@ ItemPage {
                                     source: "qrc:/images/dark/checked.svg"
                                     visible: checked
                                 }
+                            }
+                        }
+                    }
+                }
+            }
+
+            Label {
+                text: qsTr("ICON PACKS")
+                font.pixelSize: 11
+                font.weight: Font.DemiBold
+                color: FishUI.Theme.disabledTextColor
+                Layout.leftMargin: 4
+                Layout.topMargin: 4
+            }
+
+            RoundedItem {
+                GridLayout {
+                    columns: 2
+                    Layout.fillWidth: true
+                    columnSpacing: FishUI.Units.largeSpacing * 1.5
+                    rowSpacing: FishUI.Units.largeSpacing * 1.5
+
+                    Label {
+                        text: qsTr("Icon Theme")
+                        bottomPadding: FishUI.Units.smallSpacing
+                    }
+
+                    ComboBox {
+                        id: iconThemeComboBox
+                        model: iconThemeModel.installedThemes
+                        Layout.fillWidth: true
+                        topInset: 0
+                        bottomInset: 0
+                        leftPadding: FishUI.Units.largeSpacing
+                        rightPadding: FishUI.Units.largeSpacing
+                        currentIndex: {
+                            if (!model || model.length === 0) return -1
+                            var currentTheme = appearance.iconTheme
+                            if (!currentTheme) currentTheme = "Cutefish"
+                            var idx = model.indexOf(currentTheme)
+                            return idx >= 0 ? idx : 0
+                        }
+                        onActivated: function(index) {
+                            if (index >= 0 && index < model.length) {
+                                appearance.setIconTheme(model[index])
                             }
                         }
                     }

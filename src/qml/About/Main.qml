@@ -1,9 +1,3 @@
-/*
- * Copyright (C) 2021-2026 CutefishOS Team.
- *
- * Rebuilt macOS About Page (Pre-Liquid Glass / Ventura - Sonoma)
- */
-
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
@@ -31,7 +25,7 @@ ItemPage {
                 height: 10
             }
 
-            // macOS Hardware Illustration / Apple Logo Header
+            // macOS Style Hardware Logo & System Header
             ColumnLayout {
                 Layout.alignment: Qt.AlignHCenter
                 spacing: 8
@@ -56,7 +50,7 @@ ItemPage {
 
                 Label {
                     Layout.alignment: Qt.AlignHCenter
-                    text: "CutefishOS"
+                    text: about.osName
                     font.bold: true
                     font.pointSize: 18
                     color: FishUI.Theme.textColor
@@ -64,7 +58,7 @@ ItemPage {
 
                 Label {
                     Layout.alignment: Qt.AlignHCenter
-                    text: qsTr("Version %1").arg(about.version ? about.version : "0.8")
+                    text: qsTr("Version %1").arg(about.version)
                     font.pointSize: 9.5
                     color: FishUI.Theme.disabledTextColor
                 }
@@ -74,18 +68,18 @@ ItemPage {
                 height: 6
             }
 
-            // System Specifications Card (macOS Inset Grouped)
+            // System Specifications Card
             RoundedItem {
                 StandardItem {
                     key: qsTr("Processor")
-                    value: about.cpuInfo ? about.cpuInfo : qsTr("Apple M-Series / x86_64")
+                    value: about.cpuInfo
                 }
 
                 HorizontalDivider {}
 
                 StandardItem {
                     key: qsTr("Memory")
-                    value: about.memorySize ? about.memorySize : qsTr("16 GB Unified Memory")
+                    value: about.memorySize
                 }
 
                 HorizontalDivider {}
@@ -110,7 +104,7 @@ ItemPage {
                 }
             }
 
-            // Storage Overview Card
+            // System Storage Overview Card
             RoundedItem {
                 ColumnLayout {
                     Layout.fillWidth: true
@@ -120,7 +114,7 @@ ItemPage {
                         Layout.fillWidth: true
 
                         Label {
-                            text: qsTr("Macintosh HD")
+                            text: qsTr("System Storage Volume")
                             font.bold: true
                             font.pointSize: 9.5
                             color: FishUI.Theme.textColor
@@ -129,13 +123,13 @@ ItemPage {
                         Item { Layout.fillWidth: true }
 
                         Label {
-                            text: about.internalStorage ? about.internalStorage : qsTr("Available")
+                            text: about.internalStorage
                             font.pointSize: 8.5
                             color: FishUI.Theme.disabledTextColor
                         }
                     }
 
-                    // macOS Storage Bar
+                    // Storage Progress Bar
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 12
@@ -149,7 +143,7 @@ ItemPage {
 
                             Rectangle {
                                 Layout.fillHeight: true
-                                Layout.preferredWidth: parent.width * 0.35
+                                Layout.preferredWidth: parent.width * 0.40
                                 color: "#007AFF"
                                 radius: 4
                             }
@@ -163,7 +157,7 @@ ItemPage {
 
                             Rectangle {
                                 Layout.fillHeight: true
-                                Layout.preferredWidth: parent.width * 0.15
+                                Layout.preferredWidth: parent.width * 0.10
                                 color: "#FF9500"
                                 radius: 4
                             }
@@ -180,22 +174,22 @@ ItemPage {
                         RowLayout {
                             spacing: 4
                             Rectangle { width: 8; height: 8; radius: 4; color: "#007AFF" }
-                            Label { text: qsTr("Apps"); font.pointSize: 7.5; color: FishUI.Theme.disabledTextColor }
-                        }
-                        RowLayout {
-                            spacing: 4
-                            Rectangle { width: 8; height: 8; radius: 4; color: "#AF52DE" }
                             Label { text: qsTr("System"); font.pointSize: 7.5; color: FishUI.Theme.disabledTextColor }
                         }
                         RowLayout {
                             spacing: 4
+                            Rectangle { width: 8; height: 8; radius: 4; color: "#AF52DE" }
+                            Label { text: qsTr("Apps"); font.pointSize: 7.5; color: FishUI.Theme.disabledTextColor }
+                        }
+                        RowLayout {
+                            spacing: 4
                             Rectangle { width: 8; height: 8; radius: 4; color: "#FF9500" }
-                            Label { text: qsTr("Data"); font.pointSize: 7.5; color: FishUI.Theme.disabledTextColor }
+                            Label { text: qsTr("User Data"); font.pointSize: 7.5; color: FishUI.Theme.disabledTextColor }
                         }
                         RowLayout {
                             spacing: 4
                             Rectangle { width: 8; height: 8; radius: 4; color: FishUI.Theme.darkMode ? "#555558" : "#d0d0d5" }
-                            Label { text: qsTr("Free"); font.pointSize: 7.5; color: FishUI.Theme.disabledTextColor }
+                            Label { text: qsTr("Free Space"); font.pointSize: 7.5; color: FishUI.Theme.disabledTextColor }
                         }
                     }
                 }
