@@ -21,8 +21,8 @@
 #include "notifications.h"
 #include "defaultapplications.h"
 #include "applicationregistry.h"
-#include "bingwallpaper.h"
 #include "continuitymanager.h"
+#include "cicontheme.h"
 
 #include "cursor/cursorthememodel.h"
 #include "cursor/mouse.h"
@@ -85,8 +85,8 @@ Application::Application(int &argc, char **argv)
     qmlRegisterType<NetworkProxy>(uri, 1, 0, "NetworkProxy");
     qmlRegisterType<Notifications>(uri, 1, 0, "Notifications");
     qmlRegisterType<DefaultApplications>(uri, 1, 0, "DefaultApplications");
-    qmlRegisterType<BingWallpaper>(uri, 1, 0, "BingWallpaper");
     qmlRegisterType<ContinuityManager>(uri, 1, 0, "ContinuityManager");
+    qmlRegisterType<CIconTheme>(uri, 1, 0, "IconThemeModel");
 
     qmlRegisterSingletonType<Password>(uri, 1, 0, "Password", passwordSingleton);
 

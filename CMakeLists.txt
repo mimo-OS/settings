@@ -62,7 +62,6 @@ set(SRCS
     src/vpn/nm-pptp-service.h
     src/networkproxy.cpp
     src/defaultapplications.cpp
-    src/bingwallpaper.cpp
     src/continuitymanager.cpp
 #    src/update/updatemodel.cpp
 )
