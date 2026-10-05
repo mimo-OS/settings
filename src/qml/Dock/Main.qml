@@ -1,31 +1,18 @@
 /*
- * Copyright (C) 2021 CutefishOS Team.
+ * Copyright (C) 2021-2026 CutefishOS Team.
  *
- * Author:     revenmartin <revenmartin@gmail.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * macOS Inset Grouped Desktop & Dock Settings
  */
 
-import QtQuick 2.4
-import QtQuick.Controls 2.4
-import QtQuick.Layouts 1.3
+import QtQuick 2.12
+import QtQuick.Controls 2.12
+import QtQuick.Layouts 1.12
 import Cutefish.Settings 1.0
 import FishUI 1.0 as FishUI
 import "../"
 
 ItemPage {
-    headerTitle: qsTr("Dock")
+    headerTitle: qsTr("Desktop & Dock")
 
     DockSettings {
         id: dockSettings
@@ -38,131 +25,201 @@ ItemPage {
         ColumnLayout {
             id: layout
             anchors.fill: parent
-            spacing: FishUI.Units.largeSpacing * 2
+            spacing: 12
 
-            // position
-            RoundedItem {
-                Label {
-                    text: qsTr("Position on screen")
-                    color: FishUI.Theme.disabledTextColor
-                }
-
-                RowLayout {
-                    spacing: FishUI.Units.largeSpacing * 2
-
-                    IconCheckBox {
-                        source: "qrc:/images/dock_left.svg"
-                        text: qsTr("Left")
-                        checked: dockSettings.dockDirection === 0
-                        onClicked: dockSettings.setDockDirection(0)
-                    }
-
-                    IconCheckBox {
-                        source: "qrc:/images/dock_bottom.svg"
-                        text: qsTr("Bottom")
-                        checked: dockSettings.dockDirection === 1
-                        onClicked: dockSettings.setDockDirection(1)
-                    }
-
-                    IconCheckBox {
-                        source: "qrc:/images/dock_right.svg"
-                        text: qsTr("Right")
-                        checked: dockSettings.dockDirection === 2
-                        onClicked: dockSettings.setDockDirection(2)
-                    }
-                }
+            // SECTION: DOCK
+            Label {
+                text: qsTr("DOCK")
+                font.pixelSize: 11
+                font.weight: Font.DemiBold
+                color: FishUI.Theme.disabledTextColor
+                Layout.leftMargin: 4
+                Layout.topMargin: 4
             }
 
-            // Dock Size
             RoundedItem {
-                Label {
-                    text: qsTr("Size")
-                    color: FishUI.Theme.disabledTextColor
-                }
+                spacing: 0
 
-                FishUI.SegmentedControl {
-                    id: dockSizeTabbar
+                // Dock Size Row
+                Item {
                     Layout.fillWidth: true
+                    implicitHeight: 46
 
-                    TabButton {
-                        text: qsTr("Small")
-                    }
+                    RowLayout {
+                        anchors.fill: parent
+                        spacing: 12
 
-                    TabButton {
-                        text: qsTr("Medium")
-                    }
-
-                    TabButton {
-                        text: qsTr("Large")
-                    }
-
-                    TabButton {
-                        text: qsTr("Huge")
-                    }
-
-                    currentIndex: {
-                        var index = 0
-
-                        if (dockSettings.dockIconSize <= 40)
-                            index = 0
-                        else if (dockSettings.dockIconSize <= 54)
-                            index = 1
-                        else if (dockSettings.dockIconSize <= 68)
-                            index = 2
-                        else
-                            index = 3
-
-                        return index
-                    }
-
-                    onCurrentIndexChanged: {
-                        var iconSize = 0
-
-                        switch (currentIndex) {
-                        // The value is the icon size itself; the dock derives
-                        // its paddings from it (54 is the design baseline).
-                        case 0:
-                            iconSize = 40
-                            break;
-                        case 1:
-                            iconSize = 54
-                            break;
-                        case 2:
-                            iconSize = 68
-                            break;
-                        case 3:
-                            iconSize = 82
-                            break;
+                        Label {
+                            text: qsTr("Size")
+                            font.pointSize: 9
+                            color: FishUI.Theme.textColor
+                            Layout.preferredWidth: 100
                         }
 
-                        dockSettings.setDockIconSize(iconSize)
+                        Label {
+                            text: qsTr("Small")
+                            font.pointSize: 7.5
+                            color: FishUI.Theme.disabledTextColor
+                        }
+
+                        Slider {
+                            id: sizeSlider
+                            Layout.fillWidth: true
+                            from: 36
+                            to: 84
+                            stepSize: 2
+                            value: dockSettings.dockIconSize
+                            onMoved: dockSettings.setDockIconSize(Math.round(value))
+                        }
+
+                        Label {
+                            text: qsTr("Large")
+                            font.pointSize: 7.5
+                            color: FishUI.Theme.disabledTextColor
+                        }
                     }
+                }
+
+                HorizontalDivider {}
+
+                // Position on screen
+                Item {
+                    Layout.fillWidth: true
+                    implicitHeight: 46
+
+                    RowLayout {
+                        anchors.fill: parent
+                        spacing: 12
+
+                        Label {
+                            text: qsTr("Position on screen")
+                            font.pointSize: 9
+                            color: FishUI.Theme.textColor
+                            Layout.fillWidth: true
+                        }
+
+                        FishUI.SegmentedControl {
+                            id: posControl
+                            Layout.preferredWidth: 220
+                            currentIndex: dockSettings.dockDirection
+
+                            TabButton {
+                                text: qsTr("Left")
+                                onClicked: dockSettings.setDockDirection(0)
+                            }
+                            TabButton {
+                                text: qsTr("Bottom")
+                                onClicked: dockSettings.setDockDirection(1)
+                            }
+                            TabButton {
+                                text: qsTr("Right")
+                                onClicked: dockSettings.setDockDirection(2)
+                            }
+                        }
+                    }
+                }
+
+                HorizontalDivider {}
+
+                // Automatically hide and show Dock
+                StandardItem {
+                    title: qsTr("Automatically hide and show the Dock")
+                    showSwitch: true
+                    checked: dockSettings.dockVisibility !== 0
+                    onClicked: dockSettings.setDockVisibility(checked ? 2 : 0)
+                }
+
+                HorizontalDivider {}
+
+                // Dock Visibility Mode
+                Item {
+                    Layout.fillWidth: true
+                    implicitHeight: 46
+
+                    RowLayout {
+                        anchors.fill: parent
+                        spacing: 12
+
+                        Label {
+                            text: qsTr("Display mode")
+                            font.pointSize: 9
+                            color: FishUI.Theme.textColor
+                            Layout.fillWidth: true
+                        }
+
+                        FishUI.SegmentedControl {
+                            Layout.preferredWidth: 260
+                            currentIndex: dockSettings.dockVisibility
+
+                            TabButton {
+                                text: qsTr("Always Show")
+                                onClicked: dockSettings.setDockVisibility(0)
+                            }
+                            TabButton {
+                                text: qsTr("Always Hide")
+                                onClicked: dockSettings.setDockVisibility(1)
+                            }
+                            TabButton {
+                                text: qsTr("Smart Hide")
+                                onClicked: dockSettings.setDockVisibility(2)
+                            }
+                        }
+                    }
+                }
+
+                HorizontalDivider {}
+
+                // Floating Rounded Window
+                StandardItem {
+                    title: qsTr("Floating rounded dock style")
+                    subtitle: qsTr("Show dock with macOS curved floating margin")
+                    showSwitch: true
+                    checked: dockSettings.dockRoundedWindow
+                    onClicked: dockSettings.setDockRoundedWindow(checked)
                 }
             }
 
-            // Visibility
+            // SECTION: WINDOWS & BEHAVIOR
+            Label {
+                text: qsTr("WINDOWS & BEHAVIOR")
+                font.pixelSize: 11
+                font.weight: Font.DemiBold
+                color: FishUI.Theme.disabledTextColor
+                Layout.leftMargin: 4
+                Layout.topMargin: 12
+            }
+
             RoundedItem {
-                Label {
-                    text: qsTr("Display mode")
-                    color: FishUI.Theme.disabledTextColor
+                spacing: 0
+
+                StandardItem {
+                    title: qsTr("Minimize windows into application icon")
+                    showSwitch: true
+                    checked: true
                 }
 
-                FishUI.SegmentedControl {
-                    Layout.fillWidth: true
-                    currentIndex: dockSettings.dockVisibility
-                    onCurrentIndexChanged: dockSettings.setDockVisibility(currentIndex)
+                HorizontalDivider {}
 
-                    TabButton {
-                        text: qsTr("Always show")
-                    }
+                StandardItem {
+                    title: qsTr("Animate opening applications")
+                    showSwitch: true
+                    checked: true
+                }
 
-                    TabButton {
-                        text: qsTr("Always hide")
-                    }
+                HorizontalDivider {}
 
-                    TabButton {
-                        text: qsTr("Smart hide")
-                    }
+                StandardItem {
+                    title: qsTr("Show indicators for open applications")
+                    showSwitch: true
+                    checked: true
+                }
+
+                HorizontalDivider {}
+
+                StandardItem {
+                    title: qsTr("Show recent applications in Dock")
+                    showSwitch: true
+                    checked: true
                 }
             }
 

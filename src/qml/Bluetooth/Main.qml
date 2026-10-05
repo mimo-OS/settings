@@ -82,29 +82,27 @@ ItemPage {
         ColumnLayout {
             id: layout
             anchors.fill: parent
-            anchors.bottomMargin: FishUI.Units.largeSpacing
+            spacing: 12
+
+            // SECTION: BLUETOOTH
+            Label {
+                text: qsTr("BLUETOOTH")
+                font.pixelSize: 11
+                font.weight: Font.DemiBold
+                color: FishUI.Theme.disabledTextColor
+                Layout.leftMargin: 4
+                Layout.topMargin: 4
+            }
 
             RoundedItem {
                 id: mainItem
-                spacing: FishUI.Units.largeSpacing
+                spacing: 0
 
-                RowLayout {
-                    Label {
-                        text: qsTr("Bluetooth")
-                        color: FishUI.Theme.disabledTextColor
-                    }
-
-                    Item {
-                        Layout.fillWidth: true
-                    }
-
-                    Switch {
-                        id: bluetoothSwitch
-                        Layout.fillHeight: true
-                        rightPadding: 0
-                        checked: !Bluetooth.Manager.bluetoothBlocked
-                        onCheckedChanged: setBluetoothEnabled(checked)
-                    }
+                StandardItem {
+                    title: qsTr("Bluetooth")
+                    showSwitch: true
+                    checked: !Bluetooth.Manager.bluetoothBlocked
+                    onClicked: setBluetoothEnabled(checked)
                 }
 
                 ListView {

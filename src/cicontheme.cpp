@@ -1,56 +1,54 @@
 /*
- * Copyright (C) 2021 CutefishOS Team.
- *
- * Author:     Reion Wong <reionwong@gmail.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2021-2026 CutefishOS Team.
  */
 
 #include "cicontheme.h"
 #include <QStandardPaths>
-#include <QDebug>
 #include <QDir>
+#include <QFile>
+#include <QFileInfo>
+#include <QDebug>
 
 CIconTheme::CIconTheme(QObject *parent)
     : QObject(parent)
 {
+}
 
+QStringList CIconTheme::installedThemes() const
+{
+    return list();
 }
 
 QStringList CIconTheme::list()
 {
-    QStringList list;
-    QStringList iconsPath;
-    iconsPath += QStandardPaths::locateAll(QStandardPaths::GenericDataLocation, QStringLiteral("icons"), QStandardPaths::LocateDirectory);
-    iconsPath += QStandardPaths::locateAll(QStandardPaths::GenericDataLocation, QStringLiteral("pixmaps"), QStandardPaths::LocateDirectory);
+    QStringList themes;
+    QStringList searchPaths;
+    searchPaths << QDir::homePath() + QStringLiteral("/.icons")
+                << QDir::homePath() + QStringLiteral("/.local/share/icons")
+                << QStringLiteral("/usr/share/icons")
+                << QStringLiteral("/usr/local/share/icons");
 
-    for (const QString &path : qAsConst(iconsPath)) {
-        QDir dir(path);
-        QStringList dirList = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-        for (const QString &dir : dirList) {
-            const QString &itemPath = path + "/" + dir;
-            if (itemPath.startsWith("default.")) {
-                continue;
+    for (const QString &basePath : searchPaths) {
+        QDir dir(basePath);
+        if (!dir.exists())
+            continue;
+
+        const QStringList subDirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+        for (const QString &subDir : subDirs) {
+            QString themePath = basePath + QLatin1Char('/') + subDir;
+            if (QFile::exists(themePath + QStringLiteral("/index.theme"))) {
+                if (!themes.contains(subDir) && subDir != QStringLiteral("hicolor") && !subDir.startsWith(QStringLiteral("default"))) {
+                    themes.append(subDir);
+                }
             }
-
-            if (!QFileInfo::exists(itemPath + "/index.theme")) {
-                continue;
-            }
-
-            list.append(path + "/" + dir);
         }
     }
 
-    return list;
+    themes.sort(Qt::CaseInsensitive);
+
+    if (themes.isEmpty()) {
+        themes << QStringLiteral("Cutefish") << QStringLiteral("Cutefish-Dark") << QStringLiteral("Cutefish-Light");
+    }
+
+    return themes;
 }

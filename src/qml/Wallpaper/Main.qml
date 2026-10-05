@@ -28,202 +28,289 @@ import FishUI 1.0 as FishUI
 import "../"
 
 ItemPage {
-    headerTitle: qsTr("Background")
+    headerTitle: qsTr("Wallpaper")
 
     FrameworkAppearance.Wallpaper {
         id: background
     }
 
+    BingWallpaper {
+        id: bingWallpaper
+        onWallpaperApplied: function(path) {
+            background.path = path
+        }
+    }
+
     Scrollable {
         anchors.fill: parent
-        contentHeight: layout.implicitHeight
+        contentHeight: layout.implicitHeight + FishUI.Units.largeSpacing * 2
 
         ColumnLayout {
             id: layout
-            anchors.fill: parent
+            width: parent.width
             spacing: FishUI.Units.largeSpacing
 
+            // SECTION: BING DAILY WALLPAPER
+            Label {
+                text: qsTr("BING DAILY WALLPAPER")
+                font.pixelSize: 11
+                font.weight: Font.DemiBold
+                color: FishUI.Theme.disabledTextColor
+                Layout.leftMargin: 4
+                Layout.topMargin: 4
+            }
+
+            // Bing Daily Wallpaper Card
             RoundedItem {
-                RowLayout {
-                    spacing: FishUI.Units.largeSpacing * 2
+                Layout.fillWidth: true
+                implicitHeight: _bingCardCol.implicitHeight + FishUI.Units.largeSpacing * 2
 
-                    Label {
-                        text: qsTr("Background type")
-                        leftPadding: FishUI.Units.smallSpacing
-                    }
+                ColumnLayout {
+                    id: _bingCardCol
+                    anchors.fill: parent
+                    anchors.margins: FishUI.Units.largeSpacing
+                    spacing: FishUI.Units.largeSpacing
 
-                    FishUI.SegmentedControl {
+                    RowLayout {
                         Layout.fillWidth: true
+                        spacing: FishUI.Units.largeSpacing
 
-                        onCurrentIndexChanged: {
-                            background.type = currentIndex
-                        }
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: FishUI.Units.smallSpacing / 2
 
-                        Component.onCompleted: {
-                            currentIndex = background.type
-                        }
+                            Label {
+                                text: qsTr("Bing Daily Wallpaper")
+                                font.bold: true
+                                font.pixelSize: 14
+                            }
 
-                        TabButton {
-                            text: qsTr("Picture")
-                        }
-
-                        TabButton {
-                            text: qsTr("Color")
-                        }
-                    }
-                }
-
-                GridView {
-                    id: _view
-
-                    property int rowCount: _view.width / itemWidth
-
-                    Layout.fillWidth: true
-                    implicitHeight: Math.ceil(_view.count / rowCount) * cellHeight + FishUI.Units.largeSpacing
-
-                    visible: background.type === 0
-
-                    clip: true
-                    model: background.backgrounds
-                    currentIndex: -1
-                    interactive: false
-
-                    cellHeight: itemHeight
-                    cellWidth: calcExtraSpacing(itemWidth, _view.width) + itemWidth
-
-                    property int itemWidth: 180
-                    property int itemHeight: 127
-
-                    delegate: Item {
-                        id: item
-
-                        property bool isSelected: modelData === background.path
-
-                        width: GridView.view.cellWidth
-                        height: GridView.view.cellHeight
-                        scale: 1.0
-
-                        Behavior on scale {
-                            NumberAnimation {
-                                duration: 200
-                                easing.type: Easing.OutSine
+                            Label {
+                                text: qsTr("Automatically refresh desktop background with Bing's daily featured photography")
+                                color: FishUI.Theme.disabledTextColor
+                                font.pixelSize: 12
+                                wrapMode: Text.WordWrap
+                                Layout.fillWidth: true
                             }
                         }
 
-                        // Preload background
-                        Rectangle {
-                            anchors.fill: parent
-                            anchors.margins: FishUI.Units.largeSpacing
-                            radius: FishUI.Theme.bigRadius + FishUI.Units.smallSpacing / 2
-                            color: FishUI.Theme.backgroundColor
-                            visible: _image.status !== Image.Ready
+                        Switch {
+                            checked: bingWallpaper.enabled
+                            onToggled: bingWallpaper.enabled = checked
+                        }
+                    }
+
+                    // Bing Today Info & Preview
+                    ColumnLayout {
+                        id: _bingPreviewCol
+                        Layout.fillWidth: true
+                        spacing: FishUI.Units.largeSpacing
+                        visible: bingWallpaper.enabled || bingWallpaper.localPath.length > 0 || (bingWallpaper.imageUrl && bingWallpaper.imageUrl.length > 0)
+
+                        HorizontalDivider {
+                            Layout.fillWidth: true
                         }
 
-                        // Preload image
-                        Image {
-                            anchors.centerIn: parent
-                            width: 32
-                            height: width
-                            sourceSize: Qt.size(width, height)
-                            source: FishUI.Theme.darkMode ? "qrc:/images/dark/picture.svg"
-                                                          : "qrc:/images/light/picture.svg"
-                            visible: _image.status !== Image.Ready
-                        }
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: FishUI.Units.largeSpacing * 2
 
-                        Rectangle {
-                            anchors.fill: parent
-                            anchors.margins: FishUI.Units.smallSpacing
-                            color: "transparent"
-                            radius: FishUI.Theme.bigRadius + FishUI.Units.smallSpacing / 2
+                            Rectangle {
+                                Layout.preferredWidth: 160
+                                Layout.preferredHeight: 90
+                                radius: 10
+                                clip: true
+                                color: FishUI.Theme.darkMode ? "#2C2C2E" : "#E5E5EA"
+                                border.width: 1 / FishUI.Dpi.ratio
+                                border.color: FishUI.Theme.darkMode ? Qt.rgba(255, 255, 255, 0.15) : Qt.rgba(0, 0, 0, 0.1)
 
-                            border.color: FishUI.Theme.highlightColor
-                            border.width: _image.status == Image.Ready & isSelected ? 3 : 0
-
-                            Image {
-                                id: _image
-                                anchors.fill: parent
-                                anchors.margins: FishUI.Units.smallSpacing
-                                source: "file://" + modelData
-                                sourceSize: Qt.size(width, height)
-                                fillMode: Image.PreserveAspectCrop
-                                asynchronous: true
-                                mipmap: true
-                                cache: true
-                                smooth: true
-                                opacity: 1.0
-
-                                Behavior on opacity {
-                                    NumberAnimation {
-                                        duration: 100
-                                        easing.type: Easing.InOutCubic
-                                    }
+                                Image {
+                                    anchors.fill: parent
+                                    source: bingWallpaper.localPath.length > 0 ? "file://" + bingWallpaper.localPath : (bingWallpaper.imageUrl ? bingWallpaper.imageUrl : "")
+                                    fillMode: Image.PreserveAspectCrop
+                                    asynchronous: true
                                 }
 
-                                layer.enabled: true
-                                layer.effect: OpacityMask {
-                                    maskSource: Item {
-                                        width: _image.width
-                                        height: _image.height
+                                BusyIndicator {
+                                    anchors.centerIn: parent
+                                    running: bingWallpaper.isUpdating
+                                    visible: running
+                                }
+                            }
 
-                                        Rectangle {
-                                            anchors.fill: parent
-                                            radius: FishUI.Theme.bigRadius
-                                        }
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: FishUI.Units.smallSpacing
+
+                                Label {
+                                    text: bingWallpaper.title ? bingWallpaper.title : qsTr("Bing Image of the Day")
+                                    font.bold: true
+                                    font.pixelSize: 13
+                                    wrapMode: Text.WordWrap
+                                    Layout.fillWidth: true
+                                }
+
+                                Label {
+                                    text: bingWallpaper.copyright ? bingWallpaper.copyright : ""
+                                    color: FishUI.Theme.disabledTextColor
+                                    font.pixelSize: 11
+                                    wrapMode: Text.WordWrap
+                                    Layout.fillWidth: true
+                                    visible: text.length > 0
+                                }
+
+                                Label {
+                                    text: bingWallpaper.statusMessage
+                                    color: "#34C759"
+                                    font.pixelSize: 11
+                                }
+
+                                RowLayout {
+                                    spacing: FishUI.Units.largeSpacing
+
+                                    Button {
+                                        text: qsTr("Update Now")
+                                        enabled: !bingWallpaper.isUpdating
+                                        onClicked: bingWallpaper.fetchToday(true)
+                                    }
+
+                                    Button {
+                                        text: qsTr("Set as Wallpaper")
+                                        enabled: bingWallpaper.localPath.length > 0
+                                        onClicked: bingWallpaper.applyAsWallpaper()
                                     }
                                 }
                             }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                acceptedButtons: Qt.LeftButton
-                                hoverEnabled: true
-
-                                onClicked: {
-                                    background.path = modelData
-                                }
-
-                                onEntered: function() {
-                                    _image.opacity = 0.7
-                                }
-                                onExited: function() {
-                                    _image.opacity = 1.0
-                                }
-
-                                onPressedChanged: item.scale = pressed ? 0.97 : 1.0
-                            }
                         }
                     }
-
-                    function calcExtraSpacing(cellSize, containerSize) {
-                        var availableColumns = Math.floor(containerSize / cellSize)
-                        var extraSpacing = 0
-                        if (availableColumns > 0) {
-                            var allColumnSize = availableColumns * cellSize
-                            var extraSpace = Math.max(containerSize - allColumnSize, 0)
-                            extraSpacing = extraSpace / availableColumns
-                        }
-                        return Math.floor(extraSpacing)
-                    }
-                }
-
-                Item {
-                    visible: background.type === 1
-                    height: FishUI.Units.smallSpacing
-                }
-
-                Loader {
-                    Layout.fillWidth: true
-                    height: item ? item.height : 0
-                    visible: background.type === 1
-                    sourceComponent: colorView
                 }
             }
 
-//            DesktopPreview {
-//                Layout.alignment: Qt.AlignHCenter
-//                width: 500
-//                height: 300
-//            }
+            // SECTION: WALLPAPERS & COLORS
+            Label {
+                text: qsTr("WALLPAPERS & COLORS")
+                font.pixelSize: 11
+                font.weight: Font.DemiBold
+                color: FishUI.Theme.disabledTextColor
+                Layout.leftMargin: 4
+                Layout.topMargin: 8
+            }
+
+            RoundedItem {
+                Layout.fillWidth: true
+                implicitHeight: _wallCol.implicitHeight + FishUI.Units.largeSpacing * 2
+
+                ColumnLayout {
+                    id: _wallCol
+                    anchors.fill: parent
+                    anchors.margins: FishUI.Units.largeSpacing
+                    spacing: FishUI.Units.largeSpacing
+
+                    // Header: Background type & Segmented Control
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: FishUI.Units.largeSpacing * 2
+
+                        Label {
+                            text: qsTr("Background type")
+                            font.bold: true
+                            leftPadding: FishUI.Units.smallSpacing
+                        }
+
+                        Item { Layout.fillWidth: true }
+
+                        FishUI.SegmentedControl {
+                            Layout.preferredWidth: 200
+                            currentIndex: background.type
+                            onCurrentIndexChanged: {
+                                background.type = currentIndex
+                            }
+
+                            TabButton {
+                                text: qsTr("Picture")
+                            }
+
+                            TabButton {
+                                text: qsTr("Color")
+                            }
+                        }
+                    }
+
+                    HorizontalDivider {
+                        Layout.fillWidth: true
+                    }
+
+                    // Wallpaper GridView
+                    GridView {
+                        id: _view
+                        Layout.fillWidth: true
+                        visible: background.type === 0
+                        clip: true
+                        model: background.backgrounds
+                        interactive: false
+
+                        readonly property int itemTargetWidth: 180
+                        readonly property int columns: Math.max(1, Math.floor(_view.width / itemTargetWidth))
+                        readonly property int numRows: Math.ceil(Math.max(1, _view.count) / columns)
+
+                        cellWidth: Math.floor(_view.width / columns)
+                        cellHeight: Math.round(cellWidth * 9 / 16)
+                        implicitHeight: numRows * cellHeight + FishUI.Units.largeSpacing
+
+                        delegate: Item {
+                            id: itemDelegate
+                            property bool isSelected: modelData === background.path
+                            width: _view.cellWidth
+                            height: _view.cellHeight
+
+                            Rectangle {
+                                anchors.fill: parent
+                                anchors.margins: 6
+                                radius: 12
+                                color: "transparent"
+                                border.width: isSelected ? 3 : 0
+                                border.color: FishUI.Theme.highlightColor
+
+                                Rectangle {
+                                    anchors.fill: parent
+                                    anchors.margins: isSelected ? 3 : 0
+                                    radius: isSelected ? 9 : 12
+                                    clip: true
+                                    color: FishUI.Theme.darkMode ? "#2C2C2E" : "#E5E5EA"
+
+                                    Image {
+                                        id: _image
+                                        anchors.fill: parent
+                                        source: "file://" + modelData
+                                        fillMode: Image.PreserveAspectCrop
+                                        asynchronous: true
+                                        smooth: true
+                                        mipmap: true
+                                    }
+
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: {
+                                            background.path = modelData
+                                        }
+                                        onEntered: _image.opacity = 0.8
+                                        onExited: _image.opacity = 1.0
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Color Picker
+                    Loader {
+                        Layout.fillWidth: true
+                        visible: background.type === 1
+                        sourceComponent: colorView
+                    }
+                }
+            }
 
             Item {
                 height: FishUI.Units.largeSpacing
@@ -238,12 +325,12 @@ ItemPage {
             id: _colorView
             Layout.fillWidth: true
 
-            property int rowCount: _colorView.width / cellWidth
+            readonly property int cellDim: 50
+            readonly property int columns: Math.max(1, Math.floor(_colorView.width / cellDim))
+            implicitHeight: Math.ceil(_colorView.count / columns) * cellDim + FishUI.Units.largeSpacing
 
-            implicitHeight: Math.ceil(_colorView.count / _colorView.rowCount) * cellHeight + FishUI.Units.largeSpacing
-
-            cellWidth: 50
-            cellHeight: 50
+            cellWidth: cellDim
+            cellHeight: cellDim
 
             interactive: false
             model: ListModel {}

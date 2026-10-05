@@ -1,118 +1,171 @@
 /*
- * Copyright (C) 2021 CutefishOS Team.
+ * Copyright (C) 2021-2026 CutefishOS Team.
  *
- * Author:     revenmartin <revenmartin@gmail.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * macOS Inset Grouped Language & Region Settings
  */
 
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
-import Qt5Compat.GraphicalEffects
-
 import FishUI 1.0 as FishUI
 import Cutefish.Settings 1.0 as Settings
+import "./"
 
 ItemPage {
-    headerTitle: qsTr("Language")
+    headerTitle: qsTr("Language & Region")
 
     Settings.Language {
         id: language
     }
 
-    ColumnLayout {
+    Scrollable {
         anchors.fill: parent
-        anchors.topMargin: FishUI.Units.smallSpacing
+        contentHeight: layout.implicitHeight
 
-        ListView {
-            id: listView
+        ColumnLayout {
+            id: layout
+            anchors.fill: parent
+            spacing: 12
 
-            FishUI.WheelHandler {
-                target: listView
+            // SECTION: PREFERRED LANGUAGES
+            Label {
+                text: qsTr("PREFERRED LANGUAGES")
+                font.pixelSize: 11
+                font.weight: Font.DemiBold
+                color: FishUI.Theme.disabledTextColor
+                Layout.leftMargin: 4
+                Layout.topMargin: 4
             }
 
-            Layout.fillWidth: true
-            Layout.fillHeight: true
+            RoundedItem {
+                spacing: 0
 
-            model: language.languages
-            clip: true
+                ListView {
+                    id: listView
+                    Layout.fillWidth: true
+                    interactive: false
+                    spacing: 0
 
-            topMargin: FishUI.Units.largeSpacing
-            leftMargin: FishUI.Units.largeSpacing * 2
-            rightMargin: FishUI.Units.largeSpacing * 2
-            bottomMargin: FishUI.Units.largeSpacing
-            spacing: FishUI.Units.largeSpacing
+                    Layout.preferredHeight: {
+                        var totalHeight = 0
+                        for (var i = 0; i < listView.visibleChildren.length; ++i) {
+                            totalHeight += listView.visibleChildren[i].height
+                        }
+                        return totalHeight
+                    }
 
-            currentIndex: language.currentLanguage
+                    model: language.languages
+                    currentIndex: language.currentLanguage
 
-            ScrollBar.vertical: ScrollBar {
-                bottomPadding: FishUI.Theme.smallRadius
+                    delegate: ColumnLayout {
+                        width: listView.width
+                        spacing: 0
+
+                        property bool isSelected: index === language.currentLanguage
+
+                        Item {
+                            Layout.fillWidth: true
+                            implicitHeight: 46
+
+                            Rectangle {
+                                anchors.fill: parent
+                                color: itemMouse.containsMouse ? (FishUI.Theme.darkMode ? Qt.rgba(1, 1, 1, 0.05) : Qt.rgba(0, 0, 0, 0.03)) : "transparent"
+                                radius: 6
+                            }
+
+                            MouseArea {
+                                id: itemMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                onClicked: language.setCurrentLanguage(index)
+                            }
+
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.leftMargin: 16
+                                anchors.rightMargin: 16
+                                spacing: 10
+
+                                Label {
+                                    text: modelData
+                                    font.pixelSize: 13
+                                    font.weight: isSelected ? Font.Medium : Font.Normal
+                                    color: FishUI.Theme.textColor
+                                    Layout.fillWidth: true
+                                }
+
+                                Image {
+                                    width: 16
+                                    height: 16
+                                    sourceSize: Qt.size(16, 16)
+                                    source: "qrc:/images/dark/checked.svg"
+                                    visible: isSelected
+                                    Layout.alignment: Qt.AlignVCenter
+                                }
+                            }
+                        }
+
+                        HorizontalDivider {
+                            visible: index < listView.count - 1
+                        }
+                    }
+                }
             }
 
-            highlightFollowsCurrentItem: true
-            highlightMoveDuration: 0
-            highlightResizeDuration : 0
-            highlight: Rectangle {
-                color: FishUI.Theme.highlightColor
-                radius: FishUI.Theme.smallRadius
+            // SECTION: REGION & FORMATS
+            Label {
+                text: qsTr("REGION & FORMATS")
+                font.pixelSize: 11
+                font.weight: Font.DemiBold
+                color: FishUI.Theme.disabledTextColor
+                Layout.leftMargin: 4
+                Layout.topMargin: 8
             }
 
-            delegate: MouseArea {
-                property bool isSelected: index == listView.currentIndex
+            RoundedItem {
+                spacing: 0
 
-                id: item
-                width: ListView.view.width - ListView.view.leftMargin - ListView.view.rightMargin
-                height: 36
-                hoverEnabled: true
-                acceptedButtons: Qt.LeftButton
-
-                onClicked: {
-                    language.setCurrentLanguage(index)
+                StandardItem {
+                    title: qsTr("Region")
+                    value: qsTr("System Default")
+                    showChevron: false
                 }
 
-                Rectangle {
-                    anchors.fill: parent
-                    color: isSelected ? "transparent" : item.containsMouse ? FishUI.Theme.disabledTextColor : "transparent"
-                    opacity: isSelected ? 1 : 0.1
-                    radius: FishUI.Theme.smallRadius
+                HorizontalDivider {}
+
+                StandardItem {
+                    title: qsTr("Calendar")
+                    value: qsTr("Gregorian")
+                    showChevron: false
                 }
 
-                RowLayout {
-                    anchors.fill: parent
-                    anchors.leftMargin: FishUI.Units.smallSpacing
-                    anchors.rightMargin: FishUI.Units.largeSpacing
+                HorizontalDivider {}
 
-                    Label {
-                        color: isSelected ? FishUI.Theme.highlightedTextColor : FishUI.Theme.textColor
-                        text: modelData
-                        Layout.alignment: Qt.AlignVCenter
-                    }
-
-                    Item {
-                        Layout.fillWidth: true
-                    }
-
-                    Image {
-                        width: item.height * 0.45
-                        height: width
-                        sourceSize: Qt.size(width, height)
-                        source: "qrc:/images/dark/checked.svg"
-                        visible: isSelected
-                        smooth: false
-                    }
+                StandardItem {
+                    title: qsTr("Temperature")
+                    value: qsTr("Celsius (°C)")
+                    showChevron: false
                 }
+
+                HorizontalDivider {}
+
+                StandardItem {
+                    title: qsTr("Measurement system")
+                    value: qsTr("Metric")
+                    showChevron: false
+                }
+
+                HorizontalDivider {}
+
+                StandardItem {
+                    title: qsTr("First day of week")
+                    value: qsTr("Monday")
+                    showChevron: false
+                }
+            }
+
+            Item {
+                Layout.fillHeight: true
             }
         }
     }

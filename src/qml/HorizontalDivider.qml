@@ -1,37 +1,20 @@
 /*
- * Copyright (C) 2021 CutefishOS Team.
+ * Copyright (C) 2021-2026 CutefishOS Team.
  *
- * Author:     revenmartin <revenmartin@gmail.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * macOS Inset Card Divider
  */
 
-import QtQuick 2.4
-import QtQuick.Layouts 1.3
+import QtQuick 2.12
+import QtQuick.Layouts 1.12
 import FishUI 1.0 as FishUI
 
 Item {
     id: control
-    height: FishUI.Units.largeSpacing * 2
-
+    height: 1
     Layout.fillWidth: true
 
     Rectangle {
-        anchors.centerIn: parent
-        height: 1
-        width: control.width
-        color: FishUI.Theme.disabledTextColor
-        opacity: FishUI.Theme.darkMode ? 0.3 : 0.1
+        anchors.fill: parent
+        color: FishUI.Theme.darkMode ? Qt.rgba(1, 1, 1, 0.07) : Qt.rgba(0, 0, 0, 0.06)
     }
 }

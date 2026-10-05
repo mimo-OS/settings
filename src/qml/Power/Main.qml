@@ -1,34 +1,19 @@
 /*
- * Copyright (C) 2021 CutefishOS Team.
+ * Copyright (C) 2021-2026 CutefishOS Team.
  *
- * Author:     revenmartin <revenmartin@gmail.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * macOS Inset Grouped Energy Saver Settings
  */
 
-import QtQuick 2.4
-import QtQuick.Controls 2.4
-import QtQuick.Layouts 1.3
-import Qt5Compat.GraphicalEffects
-
+import QtQuick 2.12
+import QtQuick.Controls 2.12
+import QtQuick.Layouts 1.12
 import Cutefish.Settings 1.0
 import FishUI 1.0 as FishUI
 import "../"
 
 ItemPage {
     id: control
-    headerTitle: qsTr("Power")
+    headerTitle: qsTr("Energy Saver")
 
     PowerManager {
         id: power
@@ -52,86 +37,155 @@ ItemPage {
         ColumnLayout {
             id: layout
             anchors.fill: parent
-            spacing: FishUI.Units.largeSpacing
+            spacing: 12
+
+            // SECTION: ENERGY MODE
+            Label {
+                text: qsTr("ENERGY MODE")
+                font.pixelSize: 11
+                font.weight: Font.DemiBold
+                color: FishUI.Theme.disabledTextColor
+                Layout.leftMargin: 4
+                Layout.topMargin: 4
+            }
 
             RoundedItem {
-                Label {
-                    text: qsTr("Mode")
-                    color: FishUI.Theme.disabledTextColor
-                }
+                spacing: 0
 
-                RowLayout {
-                    spacing: FishUI.Units.largeSpacing * 2
+                Item {
+                    Layout.fillWidth: true
+                    implicitHeight: 46
 
-                    IconCheckBox {
-                        source: "qrc:/images/powersave.svg"
-                        text: qsTr("Power Save")
-                        checked: power.mode === 0
-                        onClicked: power.mode = 0
-                    }
+                    RowLayout {
+                        anchors.fill: parent
+                        spacing: 12
 
-                    IconCheckBox {
-                        source: "qrc:/images/performance.svg"
-                        text: qsTr("Performance")
-                        checked: power.mode === 1
-                        onClicked: power.mode = 1
+                        Label {
+                            text: qsTr("Power Mode")
+                            font.pointSize: 9
+                            color: FishUI.Theme.textColor
+                            Layout.fillWidth: true
+                        }
+
+                        FishUI.SegmentedControl {
+                            Layout.preferredWidth: 240
+                            currentIndex: power.mode === 1 ? 1 : 0
+
+                            TabButton {
+                                text: qsTr("Power Save")
+                                onClicked: power.mode = 0
+                            }
+
+                            TabButton {
+                                text: qsTr("Performance")
+                                onClicked: power.mode = 1
+                            }
+                        }
                     }
                 }
             }
 
             Label {
                 color: FishUI.Theme.disabledTextColor
-                leftPadding: FishUI.Units.largeSpacing * 2
-                rightPadding: FishUI.Units.largeSpacing
+                Layout.leftMargin: 4
+                Layout.rightMargin: 4
                 Layout.fillWidth: true
                 wrapMode: Text.WordWrap
-                text: qsTr("Performance mode: CPU and GPU frequencies will be increased, while power consumption and heat generation will be increased.")
+                font.pixelSize: 10
+                text: qsTr("Performance mode maximizes CPU and GPU frequencies for intensive workloads, while Power Save mode conserves energy.")
+            }
+
+            // SECTION: DISPLAY SLEEP
+            Label {
+                text: qsTr("DISPLAY SLEEP")
+                font.pixelSize: 11
+                font.weight: Font.DemiBold
+                color: FishUI.Theme.disabledTextColor
+                Layout.leftMargin: 4
+                Layout.topMargin: 8
             }
 
             RoundedItem {
-                Layout.topMargin: FishUI.Units.largeSpacing
+                spacing: 0
 
-                GridLayout {
-                    columns: 2
-                    rowSpacing: FishUI.Units.largeSpacing * 2
-                    Layout.bottomMargin: FishUI.Units.largeSpacing
+                // Battery sleep row
+                Item {
+                    Layout.fillWidth: true
+                    implicitHeight: 46
+                    visible: battery.available
 
-                    Label {
-                        visible: battery.available
-                        text: qsTr("Turn off display when inactive on battery")
-                        Layout.fillWidth: true
+                    RowLayout {
+                        anchors.fill: parent
+                        spacing: 12
+
+                        Label {
+                            text: qsTr("Turn off display when inactive on battery")
+                            font.pointSize: 9
+                            color: FishUI.Theme.textColor
+                            Layout.fillWidth: true
+                        }
+
+                        ComboBox {
+                            Layout.preferredWidth: 160
+                            model: [qsTr("1 Minute"), qsTr("2 Minutes"), qsTr("5 Minutes"),
+                                    qsTr("10 Minutes"), qsTr("15 Minutes"), qsTr("20 Minutes"),
+                                    qsTr("30 Minutes"), qsTr("Never")]
+                            currentIndex: timeoutToIndex(power.batteryScreenOff)
+                            onActivated: power.batteryScreenOff = timeoutValues[currentIndex]
+                        }
                     }
+                }
 
-                    ComboBox {
-                        visible: battery.available
-                        Layout.preferredWidth: 160
+                HorizontalDivider {
+                    visible: battery.available
+                }
 
-                        model: [qsTr("1 Minute"), qsTr("2 Minutes"), qsTr("5 Minutes"),
-                                qsTr("10 Minutes"), qsTr("15 Minutes"), qsTr("20 Minutes"),
-                                qsTr("30 Minutes"), qsTr("Never")]
-                        currentIndex: timeoutToIndex(power.batteryScreenOff)
-                        onActivated: power.batteryScreenOff = timeoutValues[currentIndex]
+                // AC sleep row
+                Item {
+                    Layout.fillWidth: true
+                    implicitHeight: 46
+
+                    RowLayout {
+                        anchors.fill: parent
+                        spacing: 12
+
+                        Label {
+                            text: qsTr("Turn off display when inactive on power adapter")
+                            font.pointSize: 9
+                            color: FishUI.Theme.textColor
+                            Layout.fillWidth: true
+                        }
+
+                        ComboBox {
+                            Layout.preferredWidth: 160
+                            model: [qsTr("1 Minute"), qsTr("2 Minutes"), qsTr("5 Minutes"),
+                                    qsTr("10 Minutes"), qsTr("15 Minutes"), qsTr("20 Minutes"),
+                                    qsTr("30 Minutes"), qsTr("Never")]
+                            currentIndex: timeoutToIndex(power.acScreenOff)
+                            onActivated: power.acScreenOff = timeoutValues[currentIndex]
+                        }
                     }
+                }
 
-                    Label {
-                        text: qsTr("Turn off display when inactive on power adapter")
-                        Layout.fillWidth: true
-                    }
+                HorizontalDivider {}
 
-                    ComboBox {
-                        Layout.preferredWidth: 160
-                        model: [qsTr("1 Minute"), qsTr("2 Minutes"), qsTr("5 Minutes"),
-                                qsTr("10 Minutes"), qsTr("15 Minutes"), qsTr("20 Minutes"),
-                                qsTr("30 Minutes"), qsTr("Never")]
-                        currentIndex: timeoutToIndex(power.acScreenOff)
-                        onActivated: power.acScreenOff = timeoutValues[currentIndex]
-                    }
+                StandardItem {
+                    title: qsTr("Prevent automatic sleeping when display is off")
+                    showSwitch: true
+                    checked: false
+                }
 
+                HorizontalDivider {}
+
+                StandardItem {
+                    title: qsTr("Wake for network access")
+                    showSwitch: true
+                    checked: true
                 }
             }
 
             Item {
-                height: FishUI.Units.largeSpacing * 2
+                Layout.fillHeight: true
             }
         }
     }

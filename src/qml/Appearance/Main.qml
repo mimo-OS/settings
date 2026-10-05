@@ -71,11 +71,17 @@ ItemPage {
             anchors.fill: parent
             spacing: FishUI.Units.largeSpacing * 2
 
+            Label {
+                text: qsTr("APPEARANCE")
+                font.pixelSize: 11
+                font.weight: Font.DemiBold
+                color: FishUI.Theme.disabledTextColor
+                Layout.leftMargin: 4
+                Layout.topMargin: 4
+            }
+
             RoundedItem {
-                Label {
-                    text: qsTr("Appearance")
-                    color: FishUI.Theme.disabledTextColor
-                }
+                spacing: 12
 
                 // Light Mode and Dark Mode
                 RowLayout {
@@ -102,63 +108,33 @@ ItemPage {
 
                 HorizontalDivider {}
 
-                RowLayout {
-                    spacing: FishUI.Units.largeSpacing
-
-                    Label {
-                        id: dimsTipsLabel
-                        text: qsTr("Dim the wallpaper in dark theme")
-                        bottomPadding: FishUI.Units.smallSpacing
-                        Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-                    }
-
-                    Item {
-                        Layout.fillWidth: true
-                    }
-
-                    Switch {
-                        checked: appearance.dimsWallpaper
-                        height: dimsTipsLabel.height
-                        Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
-                        onCheckedChanged: appearance.setDimsWallpaper(checked)
-                        rightPadding: 0
-                    }
+                StandardItem {
+                    title: qsTr("Dim the wallpaper in Dark Mode")
+                    checked: appearance.dimsWallpaper
+                    showSwitch: true
+                    onClicked: appearance.setDimsWallpaper(!appearance.dimsWallpaper)
                 }
 
-                HorizontalDivider {
-                    height: FishUI.Units.largeSpacing
-                }
+                HorizontalDivider {}
 
-                RowLayout {
-                    spacing: FishUI.Units.largeSpacing
-
-                    Label {
-                        id: blurLabel
-                        text: qsTr("Enable blur")
-                        bottomPadding: FishUI.Units.smallSpacing
-                        Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-                    }
-
-                    Item {
-                        Layout.fillWidth: true
-                    }
-
-                    Switch {
-                        checked: appearance.blurEnabled
-                        height: blurLabel.height
-                        Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
-                        onClicked: appearance.setBlurEnabled(checked)
-                        rightPadding: 0
-                    }
+                StandardItem {
+                    title: qsTr("Allow wallpaper tinting and blur in windows")
+                    checked: appearance.blurEnabled
+                    showSwitch: true
+                    onClicked: appearance.setBlurEnabled(!appearance.blurEnabled)
                 }
             }
 
-            RoundedItem {
-                Label {
-                    text: qsTr("Accent color")
-                    color: FishUI.Theme.disabledTextColor
-                }
+            Label {
+                text: qsTr("ACCENT COLOR")
+                font.pixelSize: 11
+                font.weight: Font.DemiBold
+                color: FishUI.Theme.disabledTextColor
+                Layout.leftMargin: 4
+                Layout.topMargin: 4
+            }
 
+            RoundedItem {
                 GridView {
                     id: accentColorView
                     height: itemSize
@@ -230,13 +206,17 @@ ItemPage {
                 }
             }
 
+            Label {
+                text: qsTr("TYPOGRAPHY & FONTS")
+                font.pixelSize: 11
+                font.weight: Font.DemiBold
+                color: FishUI.Theme.disabledTextColor
+                Layout.leftMargin: 4
+                Layout.topMargin: 4
+            }
+
             RoundedItem {
                 Layout.bottomMargin: FishUI.Units.largeSpacing * 2
-
-                Label {
-                    text: qsTr("Fonts")
-                    color: FishUI.Theme.disabledTextColor
-                }
 
                 GridLayout {
                     columns: 2

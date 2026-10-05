@@ -1,20 +1,7 @@
 /*
- * Copyright (C) 2021 CutefishOS Team.
+ * Copyright (C) 2021-2026 CutefishOS Team.
  *
- * Author:     revenmartin <revenmartin@gmail.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * macOS Inset Grouped Date & Time Settings
  */
 
 import QtQuick 2.12
@@ -46,82 +33,72 @@ ItemPage {
         ColumnLayout {
             id: layout
             anchors.fill: parent
-            spacing: FishUI.Units.largeSpacing * 2
+            spacing: 12
 
-            RoundedItem {
-                spacing: FishUI.Units.largeSpacing * 1.5
-
-                RowLayout {
-                    Label {
-                        text: qsTr("Auto Sync")
-                    }
-
-                    Item {
-                        Layout.fillWidth: true
-                    }
-
-                    Switch {
-                        Layout.fillHeight: true
-                        rightPadding: 0
-                        rightInset: 0
-                        checkable: time.canNTP
-                        checked: time.useNtp
-                        onCheckedChanged: time.useNtp = checked
-                    }
-                }
-
-                Label {
-                    text: qsTr("Unable to use Auto Sync. Please ensure your NTP service is installed.")
-                    color: FishUI.Theme.disabledTextColor
-                    visible: !time.canNTP
-                }
+            // SECTION: DATE & TIME
+            Label {
+                text: qsTr("DATE & TIME")
+                font.pixelSize: 11
+                font.weight: Font.DemiBold
+                color: FishUI.Theme.disabledTextColor
+                Layout.leftMargin: 4
+                Layout.topMargin: 4
             }
 
             RoundedItem {
-                spacing: FishUI.Units.largeSpacing * 1.5
+                spacing: 0
 
-                RowLayout {
-                    Label {
-                        text: qsTr("24-Hour Time")
-                    }
+                StandardItem {
+                    title: qsTr("Set time and date automatically")
+                    subtitle: !time.canNTP ? qsTr("NTP service required for auto-sync") : qsTr("Synchronize with network time servers")
+                    showSwitch: true
+                    checked: time.useNtp
+                    enabled: time.canNTP
+                    onClicked: time.useNtp = checked
+                }
 
-                    Item {
-                        Layout.fillWidth: true
-                    }
+                HorizontalDivider {}
 
-                    Switch {
-                        Layout.fillHeight: true
-                        rightPadding: 0
-                        rightInset: 0
-                        checked: time.twentyFour
-                        onCheckedChanged: time.twentyFour = checked
-                    }
+                StandardItem {
+                    title: qsTr("24-Hour Time")
+                    subtitle: qsTr("Display time in 24-hour format instead of 12-hour AM/PM")
+                    showSwitch: true
+                    checked: time.twentyFour
+                    onClicked: time.twentyFour = checked
                 }
             }
 
-            StandardButton {
-                Layout.fillWidth: true
-                text: ""
-                // onClicked: timeZoneDialog.visibility = "Maximized"
-                onClicked: timeZoneDialog.show()
+            // SECTION: TIME ZONE
+            Label {
+                text: qsTr("TIME ZONE")
+                font.pixelSize: 11
+                font.weight: Font.DemiBold
+                color: FishUI.Theme.disabledTextColor
+                Layout.leftMargin: 4
+                Layout.topMargin: 8
+            }
 
-                RowLayout {
-                    anchors.fill: parent
-                    anchors.leftMargin: FishUI.Units.largeSpacing * 1.5
-                    anchors.rightMargin: FishUI.Units.largeSpacing * 1.5
+            RoundedItem {
+                spacing: 0
 
-                    Label {
-                        text: qsTr("Time Zone")
-                    }
-
-                    Item {
-                        Layout.fillWidth: true
-                    }
-
-                    Label {
-                        text: timeZoneMap.currentTimeZone
-                    }
+                StandardItem {
+                    title: qsTr("Closest City / Time Zone")
+                    value: timeZoneMap.currentTimeZone ? timeZoneMap.currentTimeZone : qsTr("Set Time Zone...")
+                    showChevron: true
+                    onClicked: timeZoneDialog.show()
                 }
+
+                HorizontalDivider {}
+
+                StandardItem {
+                    title: qsTr("Set time zone automatically using current location")
+                    showSwitch: true
+                    checked: true
+                }
+            }
+
+            Item {
+                Layout.fillHeight: true
             }
         }
     }

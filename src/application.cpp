@@ -21,6 +21,8 @@
 #include "notifications.h"
 #include "defaultapplications.h"
 #include "applicationregistry.h"
+#include "bingwallpaper.h"
+#include "continuitymanager.h"
 
 #include "cursor/cursorthememodel.h"
 #include "cursor/mouse.h"
@@ -83,6 +85,8 @@ Application::Application(int &argc, char **argv)
     qmlRegisterType<NetworkProxy>(uri, 1, 0, "NetworkProxy");
     qmlRegisterType<Notifications>(uri, 1, 0, "Notifications");
     qmlRegisterType<DefaultApplications>(uri, 1, 0, "DefaultApplications");
+    qmlRegisterType<BingWallpaper>(uri, 1, 0, "BingWallpaper");
+    qmlRegisterType<ContinuityManager>(uri, 1, 0, "ContinuityManager");
 
     qmlRegisterSingletonType<Password>(uri, 1, 0, "Password", passwordSingleton);
 
@@ -108,7 +112,9 @@ Application::Application(int &argc, char **argv)
     m_engine.load(QUrl(QStringLiteral("qrc:/qml/main.qml")));
 
     if (!module.isEmpty()) {
-        switchToPage(module);
+        QTimer::singleShot(0, this, [this, module]() {
+            switchToPage(module);
+        });
     }
 
     QApplication::exec();
@@ -116,8 +122,10 @@ Application::Application(int &argc, char **argv)
 
 void Application::switchToPage(const QString &name)
 {
-    QObject *mainObject = m_engine.rootObjects().first();
+    if (m_engine.rootObjects().isEmpty())
+        return;
 
+    QObject *mainObject = m_engine.rootObjects().first();
     if (mainObject) {
         QMetaObject::invokeMethod(mainObject, "switchPageFromName", Q_ARG(QVariant, name));
     }

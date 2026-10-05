@@ -14,7 +14,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake;${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-set(QT Core Gui Widgets Quick QuickControls2 DBus Xml Concurrent LinguistTools)
+set(QT Core Gui Widgets Quick QuickControls2 DBus Xml Concurrent LinguistTools Network)
 find_package(Qt6 REQUIRED ${QT})
 find_package(Freetype REQUIRED)
 find_package(PkgConfig REQUIRED)
@@ -31,9 +31,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../cutefish-framework/appearance
                  ${CMAKE_CURRENT_BINARY_DIR}/cutefish-framework-appearance-build)
 
 pkg_search_module(FontConfig REQUIRED fontconfig IMPORTED_TARGET)
-pkg_search_module(ICU REQUIRED icu-i18n)
-
-include_directories(${ICU_INCLUDE_DIRS})
+find_package(ICU REQUIRED COMPONENTS uc i18n)
 
 set(SRCS
     src/application.cpp
@@ -64,6 +62,8 @@ set(SRCS
     src/vpn/nm-pptp-service.h
     src/networkproxy.cpp
     src/defaultapplications.cpp
+    src/bingwallpaper.cpp
+    src/continuitymanager.cpp
 #    src/update/updatemodel.cpp
 )
 
@@ -85,6 +85,7 @@ target_link_libraries(${PROJECT_NAME}
         Qt6::Quick
         Qt6::QuickControls2
         Qt6::DBus
+        Qt6::Network
         Qt6::Xml
         Qt6::Concurrent
         # FishUI
@@ -95,7 +96,8 @@ target_link_libraries(${PROJECT_NAME}
 
         PkgConfig::FontConfig
         ${FREETYPE_LIBRARIES}
-        ${ICU_LDFLAGS}
+        ICU::uc
+        ICU::i18n
         Libcrypt::Libcrypt
 
         # QApt

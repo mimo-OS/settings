@@ -1,20 +1,7 @@
 /*
- * Copyright (C) 2021 CutefishOS Team.
+ * Copyright (C) 2021-2026 CutefishOS Team.
  *
- * Author:     revenmartin <revenmartin@gmail.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * macOS Inset Grouped Sound Settings
  */
 
 import QtQuick 2.12
@@ -79,176 +66,282 @@ ItemPage {
         ColumnLayout {
             id: layout
             anchors.fill: parent
+            spacing: 12
 
+            // SECTION: SOUND EFFECTS
             Label {
-                text: qsTr("Output Devices")
-                leftPadding: FishUI.Units.largeSpacing
-                bottomPadding: FishUI.Units.smallSpacing
+                text: qsTr("SOUND EFFECTS")
+                font.pixelSize: 11
+                font.weight: Font.DemiBold
                 color: FishUI.Theme.disabledTextColor
+                Layout.leftMargin: 4
+                Layout.topMargin: 4
+            }
+
+            RoundedItem {
+                spacing: 0
+
+                StandardItem {
+                    title: qsTr("Alert sound")
+                    value: qsTr("Default (Boop)")
+                    showChevron: false
+                }
+
+                HorizontalDivider {}
+
+                StandardItem {
+                    title: qsTr("Play sound on startup")
+                    showSwitch: true
+                    checked: true
+                }
+
+                HorizontalDivider {}
+
+                StandardItem {
+                    title: qsTr("Play user interface sound effects")
+                    showSwitch: true
+                    checked: true
+                }
+
+                HorizontalDivider {}
+
+                StandardItem {
+                    title: qsTr("Play feedback when volume is changed")
+                    showSwitch: true
+                    checked: true
+                }
+            }
+
+            // SECTION: OUTPUT
+            Label {
+                text: qsTr("OUTPUT")
+                font.pixelSize: 11
+                font.weight: Font.DemiBold
+                color: FishUI.Theme.disabledTextColor
+                Layout.leftMargin: 4
+                Layout.topMargin: 12
                 visible: sinks.count >= 1
             }
 
-            // Playback Devices
-            ListView {
-                id: sinks
-                Layout.fillWidth: true
-                interactive: false
-                spacing: FishUI.Units.largeSpacing
+            RoundedItem {
+                visible: sinks.count >= 1
+                spacing: 0
 
-                Layout.preferredHeight: {
-                    var totalHeight = 0
-                    for (var i = 0; i < sinks.visibleChildren.length; ++i) {
-                        totalHeight += sinks.visibleChildren[i].height
-                    }
-                    return totalHeight
-                }
+                ListView {
+                    id: sinks
+                    Layout.fillWidth: true
+                    interactive: false
+                    spacing: 0
 
-                model: paSinkFilterModel
-
-                delegate: Item {
-                    width: ListView.view.width
-                    height: _itemLayout.implicitHeight + FishUI.Units.largeSpacing * 2
-
-                    readonly property var currentPort: Ports[ActivePortIndex]
-
-                    Rectangle {
-                        anchors.fill: parent
-                        color: FishUI.Theme.secondBackgroundColor
-                        radius: FishUI.Theme.bigRadius
+                    Layout.preferredHeight: {
+                        var totalHeight = 0
+                        for (var i = 0; i < sinks.visibleChildren.length; ++i) {
+                            totalHeight += sinks.visibleChildren[i].height
+                        }
+                        return totalHeight
                     }
 
-                    ColumnLayout {
-                        id: _itemLayout
-                        anchors.fill: parent
-                        anchors.margins: FishUI.Units.largeSpacing
-                        spacing: FishUI.Units.largeSpacing
+                    model: paSinkFilterModel
 
-                        Label {
-                            text: !currentPort ? Description : currentPort.description
+                    delegate: ColumnLayout {
+                        width: sinks.width
+                        spacing: 0
+
+                        readonly property var currentPort: Ports[ActivePortIndex]
+
+                        Item {
+                            Layout.fillWidth: true
+                            implicitHeight: 64
+
+                            RowLayout {
+                                anchors.fill: parent
+                                spacing: 14
+
+                                ColumnLayout {
+                                    Layout.preferredWidth: 160
+                                    Layout.alignment: Qt.AlignVCenter
+                                    spacing: 2
+
+                                    Label {
+                                        text: !currentPort ? Description : currentPort.description
+                                        font.pointSize: 9
+                                        color: FishUI.Theme.textColor
+                                        elide: Text.ElideRight
+                                        Layout.fillWidth: true
+                                    }
+
+                                    Label {
+                                        text: qsTr("Built-in Output")
+                                        font.pointSize: 7.5
+                                        color: FishUI.Theme.disabledTextColor
+                                    }
+                                }
+
+                                Image {
+                                    width: 16
+                                    height: 16
+                                    sourceSize: Qt.size(width, height)
+                                    source: "qrc:/images/" + (FishUI.Theme.darkMode ? "dark" : "light") + "/" + audioIcon(slider.value / slider.to * 100) + ".svg"
+                                    smooth: false
+                                    antialiasing: true
+                                    Layout.alignment: Qt.AlignVCenter
+                                }
+
+                                Slider {
+                                    id: slider
+                                    Layout.fillWidth: true
+                                    Layout.alignment: Qt.AlignVCenter
+                                    value: Volume
+                                    from: PulseAudio.MinimalVolume
+                                    to: PulseAudio.NormalVolume
+                                    enabled: VolumeWritable
+                                    visible: HasVolume
+
+                                    ToolTip {
+                                        parent: slider.handle
+                                        visible: slider.pressed
+                                        text: (slider.value / slider.to * 100).toFixed(0) + "%"
+                                    }
+
+                                    onMoved: {
+                                        Volume = value
+                                        Muted = (value === 0)
+                                    }
+                                }
+
+                                Label {
+                                    text: (slider.value / slider.to * 100).toFixed(0) + "%"
+                                    font.pointSize: 8
+                                    color: FishUI.Theme.disabledTextColor
+                                    Layout.preferredWidth: 36
+                                    Layout.alignment: Qt.AlignVCenter
+                                }
+                            }
                         }
 
-                        RowLayout {
-                            spacing: FishUI.Units.largeSpacing
-
-                            Image {
-                                Layout.leftMargin: 2
-                                height: 16
-                                width: height
-                                sourceSize: Qt.size(width, height)
-                                source: "qrc:/images/" + (FishUI.Theme.darkMode ? "dark" : "light") + "/" + audioIcon(slider.value / slider.to * 100) + ".svg"
-                                smooth: false
-                                antialiasing: true
-                            }
-
-                            Slider {
-                                id: slider
-                                Layout.fillWidth: true
-                                value: Volume
-                                from: PulseAudio.MinimalVolume
-                                to: PulseAudio.NormalVolume
-                                enabled: VolumeWritable
-                                visible: HasVolume
-
-                                ToolTip {
-                                    parent: slider.handle
-                                    visible: slider.pressed
-                                    text: (slider.value / slider.to * 100).toFixed(0)
-                                }
-
-                                onMoved: {
-                                    Volume = value
-                                    Muted = (value === 0)
-                                }
-                            }
+                        HorizontalDivider {
+                            visible: index < sinks.count - 1
                         }
                     }
                 }
             }
 
-            Item {
-                height: FishUI.Units.largeSpacing * 2
-            }
-
+            // SECTION: INPUT
             Label {
-                text: qsTr("Input Devices")
-                leftPadding: FishUI.Units.largeSpacing
-                bottomPadding: FishUI.Units.smallSpacing
+                text: qsTr("INPUT")
+                font.pixelSize: 11
+                font.weight: Font.DemiBold
                 color: FishUI.Theme.disabledTextColor
+                Layout.leftMargin: 4
+                Layout.topMargin: 12
                 visible: sinkInputView.count >= 1
             }
 
-            // Recording Devices
-            ListView {
-                id: sinkInputView
-                Layout.fillWidth: true
-                Layout.preferredHeight: contentHeight
+            RoundedItem {
+                visible: sinkInputView.count >= 1
+                spacing: 0
 
-                interactive: false
-                spacing: FishUI.Units.largeSpacing
-                model: paSourceFilterModel
+                ListView {
+                    id: sinkInputView
+                    Layout.fillWidth: true
+                    interactive: false
+                    spacing: 0
 
-                delegate: Item {
-                    width: ListView.view.width
-                    height: _layout.implicitHeight + FishUI.Units.largeSpacing * 2
-
-                    readonly property var currentPort: Ports[ActivePortIndex]
-
-                    Rectangle {
-                        anchors.fill: parent
-                        color: FishUI.Theme.secondBackgroundColor
-                        radius: FishUI.Theme.bigRadius
+                    Layout.preferredHeight: {
+                        var totalHeight = 0
+                        for (var i = 0; i < sinkInputView.visibleChildren.length; ++i) {
+                            totalHeight += sinkInputView.visibleChildren[i].height
+                        }
+                        return totalHeight
                     }
 
-                    ColumnLayout {
-                        id: _layout
-                        anchors.fill: parent
-                        anchors.margins: FishUI.Units.largeSpacing
-                        spacing: FishUI.Units.largeSpacing
+                    model: paSourceFilterModel
 
-                        Label {
-                            text: !currentPort ? Description : currentPort.description
+                    delegate: ColumnLayout {
+                        width: sinkInputView.width
+                        spacing: 0
+
+                        readonly property var currentPort: Ports[ActivePortIndex]
+
+                        Item {
+                            Layout.fillWidth: true
+                            implicitHeight: 64
+
+                            RowLayout {
+                                anchors.fill: parent
+                                spacing: 14
+
+                                ColumnLayout {
+                                    Layout.preferredWidth: 160
+                                    Layout.alignment: Qt.AlignVCenter
+                                    spacing: 2
+
+                                    Label {
+                                        text: !currentPort ? Description : currentPort.description
+                                        font.pointSize: 9
+                                        color: FishUI.Theme.textColor
+                                        elide: Text.ElideRight
+                                        Layout.fillWidth: true
+                                    }
+
+                                    Label {
+                                        text: qsTr("Built-in Microphone")
+                                        font.pointSize: 7.5
+                                        color: FishUI.Theme.disabledTextColor
+                                    }
+                                }
+
+                                Image {
+                                    width: 16
+                                    height: 16
+                                    sourceSize: Qt.size(width, height)
+                                    source: "qrc:/images/" + (FishUI.Theme.darkMode ? "dark" : "light") + "/" + microphoneIcon(_slider.value / _slider.to * 100) + ".svg"
+                                    smooth: false
+                                    antialiasing: true
+                                    Layout.alignment: Qt.AlignVCenter
+                                }
+
+                                Slider {
+                                    id: _slider
+                                    Layout.fillWidth: true
+                                    Layout.alignment: Qt.AlignVCenter
+                                    value: Volume
+                                    from: PulseAudio.MinimalVolume
+                                    to: PulseAudio.NormalVolume
+                                    enabled: VolumeWritable
+                                    visible: HasVolume
+
+                                    onMoved: {
+                                        Volume = value
+                                        Muted = (value === 0)
+                                    }
+
+                                    ToolTip {
+                                        parent: _slider.handle
+                                        visible: _slider.pressed
+                                        text: (_slider.value / _slider.to * 100).toFixed(0) + "%"
+                                    }
+                                }
+
+                                Label {
+                                    text: (_slider.value / _slider.to * 100).toFixed(0) + "%"
+                                    font.pointSize: 8
+                                    color: FishUI.Theme.disabledTextColor
+                                    Layout.preferredWidth: 36
+                                    Layout.alignment: Qt.AlignVCenter
+                                }
+                            }
                         }
 
-                        RowLayout {
-                            spacing: FishUI.Units.largeSpacing
-
-                            Image {
-                                Layout.leftMargin: 2
-                                height: 16
-                                width: height
-                                sourceSize: Qt.size(width, height)
-                                source: "qrc:/images/" + (FishUI.Theme.darkMode ? "dark" : "light") + "/" + microphoneIcon(_slider.value / _slider.to * 100) + ".svg"
-                                smooth: false
-                                antialiasing: true
-                            }
-
-                            Slider {
-                                id: _slider
-                                Layout.fillWidth: true
-                                value: Volume
-                                from: PulseAudio.MinimalVolume
-                                to: PulseAudio.NormalVolume
-                                enabled: VolumeWritable
-                                visible: HasVolume
-
-                                onMoved: {
-                                    Volume = value
-                                    Muted = (value === 0)
-                                }
-
-                                ToolTip {
-                                    parent: _slider.handle
-                                    visible: _slider.pressed
-                                    text: (_slider.value / _slider.to * 100).toFixed(0)
-                                }
-                            }
+                        HorizontalDivider {
+                            visible: index < sinkInputView.count - 1
                         }
                     }
                 }
             }
 
             Item {
-                height: FishUI.Units.largeSpacing * 2
+                Layout.fillHeight: true
             }
         }
     }

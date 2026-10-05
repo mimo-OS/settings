@@ -22,6 +22,7 @@
 #include <QSettings>
 #include <QDBusArgument>
 #include <QDBusReply>
+#include <QDBusServiceWatcher>
 #include <QDebug>
 
 static const QString s_sServer = "com.cutefish.Services";
@@ -51,42 +52,66 @@ const QDBusArgument &operator>>(const QDBusArgument &argument, BatteryInfo &info
 
 Battery::Battery(QObject *parent)
     : QObject(parent)
-    , m_upowerInterface("org.freedesktop.UPower",
-                        "/org/freedesktop/UPower",
-                        "org.freedesktop.UPower",
-                        QDBusConnection::systemBus())
-    , m_interface("com.cutefish.Services",
-                  "/com/cutefish/Services/Battery",
-                  "com.cutefish.Services.Battery",
-                  QDBusConnection::sessionBus())
+    , m_upowerInterface(new QDBusInterface("org.freedesktop.UPower",
+                                           "/org/freedesktop/UPower",
+                                           "org.freedesktop.UPower",
+                                           QDBusConnection::systemBus(), this))
+    , m_interface(nullptr)
     , m_available(false)
     , m_onBattery(false)
 {
-    m_available = m_interface.isValid() && !m_interface.lastError().isValid();
+    QDBusConnection::systemBus().connect("org.freedesktop.UPower", "/org/freedesktop/UPower",
+                                         "org.freedesktop.DBus.Properties",
+                                         "PropertiesChanged", this,
+                                         SLOT(onPropertiesChanged(QString, QVariantMap, QStringList)));
 
-    if (m_available) {
+    if (m_upowerInterface && m_upowerInterface->isValid()) {
+        m_onBattery = m_upowerInterface->property("OnBattery").toBool();
+    }
+
+    QDBusServiceWatcher *watcher = new QDBusServiceWatcher(s_sServer,
+                                                           QDBusConnection::sessionBus(),
+                                                           QDBusServiceWatcher::WatchForRegistration | QDBusServiceWatcher::WatchForUnregistration,
+                                                           this);
+    connect(watcher, &QDBusServiceWatcher::serviceRegistered, this, &Battery::initServices);
+    connect(watcher, &QDBusServiceWatcher::serviceUnregistered, this, [this](const QString &) {
+        if (m_available) {
+            m_available = false;
+            emit validChanged();
+        }
+    });
+
+    initServices();
+}
+
+void Battery::initServices()
+{
+    delete m_interface;
+    m_interface = new QDBusInterface(s_sServer, s_sPath, s_sInterface, QDBusConnection::sessionBus(), this);
+
+    bool newAvailable = m_interface->isValid() && !m_interface->lastError().isValid();
+
+    if (newAvailable) {
         QDBusConnection::sessionBus().connect(s_sServer, s_sPath, s_sInterface, "chargeStateChanged", this, SLOT(chargeStateChanged(int)));
         QDBusConnection::sessionBus().connect(s_sServer, s_sPath, s_sInterface, "chargePercentChanged", this, SLOT(chargePercentChanged(int)));
         QDBusConnection::sessionBus().connect(s_sServer, s_sPath, s_sInterface, "lastChargedPercentChanged", this, SLOT(lastChargedPercentChanged()));
         QDBusConnection::sessionBus().connect(s_sServer, s_sPath, s_sInterface, "capacityChanged", this, SLOT(capacityChanged(int)));
         QDBusConnection::sessionBus().connect(s_sServer, s_sPath, s_sInterface, "remainingTimeChanged", this, SLOT(remainingTimeChanged(qlonglong)));
 
-        QDBusInterface interface("org.freedesktop.UPower", "/org/freedesktop/UPower",
-                                 "org.freedesktop.UPower", QDBusConnection::systemBus());
-
-        QDBusConnection::systemBus().connect("org.freedesktop.UPower", "/org/freedesktop/UPower",
-                                             "org.freedesktop.DBus.Properties",
-                                             "PropertiesChanged", this,
-                                             SLOT(onPropertiesChanged(QString, QVariantMap, QStringList)));
-
-        if (interface.isValid()) {
-            m_onBattery = interface.property("OnBattery").toBool();
-        }
-
-        m_udi = m_interface.property("udi").toString();
-
+        m_udi = m_interface->property("udi").toString();
         emit udiChanged();
+    }
+
+    if (m_available != newAvailable) {
+        m_available = newAvailable;
         emit validChanged();
+    }
+
+    if (m_available) {
+        emit chargeStateChanged(chargeState());
+        emit chargePercentChanged(chargePercent());
+        emit capacityChanged(capacity());
+        emit lastChargedPercentChanged();
     }
 }
 
@@ -102,13 +127,19 @@ bool Battery::onBattery() const
 
 void Battery::refresh()
 {
-    m_interface.call("refresh");
+    if (m_interface && m_interface->isValid()) {
+        m_interface->call("refresh");
+    }
 }
 
 QVariantList Battery::getHistory(const int timespan, const int resolution)
 {
     QVariantList listValues;
     QVariantMap listItem;
+
+    if (m_udi.isEmpty()) {
+        return listValues;
+    }
 
     QDBusMessage historyMessage = QDBusMessage::createMethodCall("org.freedesktop.UPower", m_udi,
                                                                  "org.freedesktop.UPower.Device", "GetHistory");
@@ -140,32 +171,32 @@ QVariantList Battery::getHistory(const int timespan, const int resolution)
 
 int Battery::chargeState() const
 {
-    return m_interface.property("chargeState").toInt();
+    return (m_interface && m_interface->isValid()) ? m_interface->property("chargeState").toInt() : 0;
 }
 
 int Battery::chargePercent() const
 {
-    return m_interface.property("chargePercent").toInt();
+    return (m_interface && m_interface->isValid()) ? m_interface->property("chargePercent").toInt() : 0;
 }
 
 int Battery::lastChargedPercent() const
 {
-    return m_interface.property("lastChargedPercent").toInt();
+    return (m_interface && m_interface->isValid()) ? m_interface->property("lastChargedPercent").toInt() : 0;
 }
 
 int Battery::capacity() const
 {
-    return m_interface.property("capacity").toInt();
+    return (m_interface && m_interface->isValid()) ? m_interface->property("capacity").toInt() : 0;
 }
 
 QString Battery::statusString() const
 {
-    return m_interface.property("statusString").toString();
+    return (m_interface && m_interface->isValid()) ? m_interface->property("statusString").toString() : QString();
 }
 
 QString Battery::lastChargedTime() const
 {
-    return m_interface.property("lastChargedTime").toString();
+    return (m_interface && m_interface->isValid()) ? m_interface->property("lastChargedTime").toString() : QString();
 }
 
 bool Battery::showPercent()
@@ -187,13 +218,20 @@ QString Battery::udi() const
 void Battery::onPropertiesChanged(const QString &ifaceName, const QVariantMap &changedProps, const QStringList &invalidatedProps)
 {
     Q_UNUSED(ifaceName);
-    Q_UNUSED(changedProps);
     Q_UNUSED(invalidatedProps);
 
-    bool onBattery = m_upowerInterface.property("OnBattery").toBool();
+    bool onBattery = m_onBattery;
+    if (changedProps.contains("OnBattery")) {
+        onBattery = changedProps.value("OnBattery").toBool();
+    } else if (m_upowerInterface && m_upowerInterface->isValid()) {
+        onBattery = m_upowerInterface->property("OnBattery").toBool();
+    }
+
     if (onBattery != m_onBattery) {
         m_onBattery = onBattery;
-        m_interface.call("refresh");
+        if (m_interface && m_interface->isValid()) {
+            m_interface->call("refresh");
+        }
         emit onBatteryChanged();
     }
 }

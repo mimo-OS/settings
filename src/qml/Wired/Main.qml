@@ -29,7 +29,7 @@ import "../"
 
 ItemPage {
     id: control
-    headerTitle: qsTr("Ethernet")
+    headerTitle: qsTr("Network")
 
     property var itemHeight: 45
     property var settingsMap: ({})

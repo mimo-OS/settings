@@ -1,20 +1,7 @@
 /*
- * Copyright (C) 2021 CutefishOS Team.
+ * Copyright (C) 2021-2026 CutefishOS Team.
  *
- * Author:     Kate Leet <kateleet@cutefishos.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * macOS Inset Grouped Notification Settings
  */
 
 import QtQuick 2.12
@@ -38,23 +25,92 @@ ItemPage {
         ColumnLayout {
             id: layout
             anchors.fill: parent
+            spacing: 12
+
+            // SECTION: FOCUS & DO NOT DISTURB
+            Label {
+                text: qsTr("FOCUS & DO NOT DISTURB")
+                font.pixelSize: 11
+                font.weight: Font.DemiBold
+                color: FishUI.Theme.disabledTextColor
+                Layout.leftMargin: 4
+                Layout.topMargin: 4
+            }
 
             RoundedItem {
-                RowLayout {
-                    Label {
-                        text: qsTr("Do Not Disturb")
-                    }
+                spacing: 0
 
-                    Item {
-                        Layout.fillWidth: true
-                    }
-
-                    Switch {
-                        checked: notifications.doNotDisturb
-                        Layout.fillHeight: true
-                        onClicked: notifications.doNotDisturb = checked
-                    }
+                StandardItem {
+                    title: qsTr("Do Not Disturb")
+                    subtitle: qsTr("Silence calls and notifications when activated")
+                    showSwitch: true
+                    checked: notifications.doNotDisturb
+                    onClicked: notifications.doNotDisturb = checked
                 }
+
+                HorizontalDivider {}
+
+                StandardItem {
+                    title: qsTr("Silence notifications when display is sleeping")
+                    showSwitch: true
+                    checked: true
+                }
+
+                HorizontalDivider {}
+
+                StandardItem {
+                    title: qsTr("Silence notifications when screen is locked")
+                    showSwitch: true
+                    checked: true
+                }
+
+                HorizontalDivider {}
+
+                StandardItem {
+                    title: qsTr("Silence notifications when mirroring display")
+                    showSwitch: true
+                    checked: true
+                }
+            }
+
+            // SECTION: NOTIFICATION PREVIEWS & SOUNDS
+            Label {
+                text: qsTr("NOTIFICATION STYLE & PREVIEWS")
+                font.pixelSize: 11
+                font.weight: Font.DemiBold
+                color: FishUI.Theme.disabledTextColor
+                Layout.leftMargin: 4
+                Layout.topMargin: 8
+            }
+
+            RoundedItem {
+                spacing: 0
+
+                StandardItem {
+                    title: qsTr("Show Previews")
+                    value: qsTr("When Unlocked")
+                    showChevron: false
+                }
+
+                HorizontalDivider {}
+
+                StandardItem {
+                    title: qsTr("Play sound for notifications")
+                    showSwitch: true
+                    checked: true
+                }
+
+                HorizontalDivider {}
+
+                StandardItem {
+                    title: qsTr("Show notification badges on Dock icons")
+                    showSwitch: true
+                    checked: true
+                }
+            }
+
+            Item {
+                Layout.fillHeight: true
             }
         }
     }

@@ -1,20 +1,7 @@
 /*
- * Copyright (C) 2021 CutefishOS Team.
+ * Copyright (C) 2021-2026 CutefishOS Team.
  *
- * Author:     Reion Wong <reion@cutefishos.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * macOS Inset Grouped Trackpad Settings
  */
 
 import QtQuick 2.12
@@ -25,7 +12,7 @@ import Cutefish.Settings 1.0
 import "../"
 
 ItemPage {
-    headerTitle: qsTr("Touchpad")
+    headerTitle: qsTr("Trackpad")
 
     Touchpad {
         id: touchpad
@@ -42,114 +29,153 @@ ItemPage {
         ColumnLayout {
             id: layout
             anchors.fill: parent
+            spacing: 12
+
+            // SECTION: TRACKPAD
+            Label {
+                text: qsTr("TRACKPAD")
+                font.pixelSize: 11
+                font.weight: Font.DemiBold
+                color: FishUI.Theme.disabledTextColor
+                Layout.leftMargin: 4
+                Layout.topMargin: 4
+            }
 
             RoundedItem {
-                GridLayout {
-                    columns: 2
-                    rowSpacing: FishUI.Units.largeSpacing * 2
+                spacing: 0
 
-                    Label {
-                        text: qsTr("Enable")
-                        Layout.fillWidth: true
-                    }
+                StandardItem {
+                    title: qsTr("Enable Trackpad")
+                    showSwitch: true
+                    checked: touchpad.enabled
+                    onClicked: touchpad.enabled = checked
+                }
 
-                    Switch {
-                        id: _enableSwitch
-                        Layout.fillHeight: true
-                        Layout.alignment: Qt.AlignRight
-                        rightPadding: 0
+                HorizontalDivider {}
 
-                        Component.onCompleted: {
-                            checked = touchpad.enabled
+                StandardItem {
+                    title: qsTr("Tap to click")
+                    subtitle: qsTr("Tap with one finger to click")
+                    showSwitch: true
+                    checked: touchpad.tapToClick
+                    onClicked: touchpad.tapToClick = checked
+                }
+
+                HorizontalDivider {}
+
+                StandardItem {
+                    title: qsTr("Natural scrolling")
+                    subtitle: qsTr("Content tracks finger movement")
+                    showSwitch: true
+                    checked: touchpad.naturalScroll
+                    onClicked: touchpad.naturalScroll = checked
+                }
+
+                HorizontalDivider {}
+
+                // Tracking speed slider
+                Item {
+                    Layout.fillWidth: true
+                    implicitHeight: 46
+
+                    RowLayout {
+                        anchors.fill: parent
+                        spacing: 12
+
+                        Label {
+                            text: qsTr("Tracking speed")
+                            font.pointSize: 9
+                            color: FishUI.Theme.textColor
+                            Layout.preferredWidth: 120
                         }
 
-                        onCheckedChanged: touchpad.enabled = checked
-                    }
-
-                    Label {
-                        visible: _enableSwitch.checked
-                        text: qsTr("Tap to click")
-                        Layout.fillWidth: true
-                    }
-
-                    Switch {
-                        visible: _enableSwitch.checked
-                        Layout.fillHeight: true
-                        onCheckedChanged: touchpad.tapToClick = checked
-                        Layout.alignment: Qt.AlignRight
-                        rightPadding: 0
-
-                        Component.onCompleted: {
-                            checked = touchpad.tapToClick
-                        }
-                    }
-
-                    Label {
-                        visible: _enableSwitch.checked
-                        text: qsTr("Natural scrolling")
-                        Layout.fillWidth: true
-                    }
-
-                    Switch {
-                        visible: _enableSwitch.checked
-                        Layout.fillHeight: true
-                        Layout.alignment: Qt.AlignRight
-                        onCheckedChanged: touchpad.naturalScroll = checked
-                        rightPadding: 0
-
-                        Component.onCompleted: {
-                            checked = touchpad.naturalScroll
-                        }
-                    }
-
-                    Label {
-                        visible: _enableSwitch.checked
-                        text: qsTr("Pointer acceleration")
-                    }
-
-                    Slider {
-                        id: accelSpeedSlider
-
-                        visible: _enableSwitch.checked
-                        Layout.fillWidth: true
-
-                        from: 1
-                        to: 11
-                        stepSize: 1
-                        property int accelSpeedValue: 0 // [-100, 100]
-
-                        function load() {
-                            accelSpeedValue = Math.round(touchpad.pointerAcceleration * 100)
-                            // convert libinput pointer acceleration range [-1, 1] to slider range [1, 11]
-                            value = Math.round(6 + touchpad.pointerAcceleration / 0.2)
+                        Label {
+                            text: qsTr("Slow")
+                            font.pointSize: 7.5
+                            color: FishUI.Theme.disabledTextColor
                         }
 
-                        function onAccelSpeedChanged(val) {
-                            // check slider
-                            if (val !== accelSpeedSlider.accelSpeedValue) {
-                                accelSpeedSlider.accelSpeedValue = val
-                                accelSpeedSlider.value = Math.round(6 + (val / 100) / 0.2)
+                        Slider {
+                            id: accelSpeedSlider
+                            Layout.fillWidth: true
+                            from: 1
+                            to: 11
+                            stepSize: 1
+                            property int accelSpeedValue: 0
+
+                            function load() {
+                                accelSpeedValue = Math.round(touchpad.pointerAcceleration * 100)
+                                value = Math.round(6 + touchpad.pointerAcceleration / 0.2)
                             }
 
-                            // check libinput accelspeed
-                            if ((val / 100) != touchpad.pointerAcceleration) {
-                                touchpad.pointerAcceleration = val / 100
+                            function onAccelSpeedChanged(val) {
+                                if (val !== accelSpeedSlider.accelSpeedValue) {
+                                    accelSpeedSlider.accelSpeedValue = val
+                                    accelSpeedSlider.value = Math.round(6 + (val / 100) / 0.2)
+                                }
+                                if ((val / 100) !== touchpad.pointerAcceleration) {
+                                    touchpad.pointerAcceleration = val / 100
+                                }
+                            }
+
+                            onMoved: {
+                                if (touchpad !== undefined) {
+                                    accelSpeedValue = Math.round(((value - 6) * 0.2) * 100)
+                                    onAccelSpeedChanged(accelSpeedValue)
+                                }
                             }
                         }
 
-                        onMoved: {
-                            if (touchpad != undefined) {
-                                // convert slider range [1, 11] to accelSpeedValue range [-100, 100]
-                                accelSpeedValue = Math.round(((value - 6) * 0.2) * 100)
-                                onAccelSpeedChanged(accelSpeedValue)
-                            }
+                        Label {
+                            text: qsTr("Fast")
+                            font.pointSize: 7.5
+                            color: FishUI.Theme.disabledTextColor
                         }
                     }
                 }
             }
 
+            // SECTION: GESTURES
+            Label {
+                text: qsTr("SCROLL & ZOOM GESTURES")
+                font.pixelSize: 11
+                font.weight: Font.DemiBold
+                color: FishUI.Theme.disabledTextColor
+                Layout.leftMargin: 4
+                Layout.topMargin: 8
+            }
+
+            RoundedItem {
+                spacing: 0
+
+                StandardItem {
+                    title: qsTr("Zoom in or out")
+                    subtitle: qsTr("Pinch with two fingers")
+                    showSwitch: true
+                    checked: true
+                }
+
+                HorizontalDivider {}
+
+                StandardItem {
+                    title: qsTr("Smart zoom")
+                    subtitle: qsTr("Double-tap with two fingers")
+                    showSwitch: true
+                    checked: true
+                }
+
+                HorizontalDivider {}
+
+                StandardItem {
+                    title: qsTr("Swipe between pages")
+                    subtitle: qsTr("Scroll left or right with two fingers")
+                    showSwitch: true
+                    checked: true
+                }
+            }
+
             Item {
-                height: FishUI.Units.smallSpacing
+                Layout.fillHeight: true
             }
         }
     }

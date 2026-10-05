@@ -28,7 +28,7 @@ import Cutefish.Settings 1.0
 import "../"
 
 ItemPage {
-    headerTitle: qsTr("Proxy")
+    headerTitle: qsTr("VPN & Proxy")
 
     Binding {
         target: ftpProxyTextField
@@ -57,7 +57,17 @@ ItemPage {
         ColumnLayout {
             id: layout
             anchors.fill: parent
-            spacing: FishUI.Units.largeSpacing * 2
+            spacing: 12
+
+            // SECTION: PROXY CONFIGURATION
+            Label {
+                text: qsTr("PROXY CONFIGURATION")
+                font.pixelSize: 11
+                font.weight: Font.DemiBold
+                color: FishUI.Theme.disabledTextColor
+                Layout.leftMargin: 4
+                Layout.topMargin: 4
+            }
 
             RoundedItem {
                 id: mainItem

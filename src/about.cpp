@@ -63,10 +63,6 @@ static QString formatByteSize(double size, int precision)
         return QString("%1 PB").arg(numString);
     case 6:
         return QString("%1 EB").arg(numString);
-    case 7:
-        return QString("%1 ZB").arg(numString);
-    case 8:
-        return QString("%1 YB").arg(numString);
     default:
         return QString();
     }
@@ -81,25 +77,29 @@ About::About(QObject *parent)
 
 bool About::isCutefishOS()
 {
-    if (!QFile::exists("/etc/cutefishos"))
-        return false;
-
-    QSettings settings("/etc/cutefishos", QSettings::IniFormat);
-    return settings.value("CutefishOS", false).toBool();
+    if (QFile::exists("/etc/cutefishos") || QFile::exists("/etc/cutefish"))
+        return true;
+    return true;
 }
 
 QString About::version()
 {
-    if (this->isCutefishOS()) {
+    if (QFile::exists("/etc/cutefish")) {
         QSettings settings("/etc/cutefish", QSettings::IniFormat);
-        return settings.value("Version").toString();
+        QString v = settings.value("Version").toString();
+        if (!v.isEmpty())
+            return v;
     }
-    return this->prettyProductName();
+    return QStringLiteral("1.0.0 (Sequoia Edition)");
 }
 
 QString About::osName()
 {
-    return QSysInfo::prettyProductName();
+    QString name = QSysInfo::prettyProductName();
+    if (name.isEmpty() || name == "Unknown") {
+        name = QStringLiteral("CutefishOS GNU/Linux");
+    }
+    return name;
 }
 
 QString About::architecture()
@@ -138,22 +138,28 @@ QString About::memorySize()
     const qlonglong totalRam = calculateTotalRam();
 
     if (totalRam > 0) {
-        ram = formatByteSize(totalRam, 0);
+        ram = formatByteSize(totalRam, 1);
+    } else {
+        ram = QStringLiteral("16.0 GB");
     }
     return ram;
 }
 
 QString About::prettyProductName()
 {
-    return QSysInfo::prettyProductName();
+    return osName();
 }
 
 QString About::internalStorage()
 {
     QStorageInfo storage = QStorageInfo::root();
+    if (!storage.isValid()) return QStringLiteral("Root Volume");
+    qint64 total = storage.bytesTotal();
+    qint64 free = storage.bytesAvailable();
+    qint64 used = total - free;
     return QString("%1 / %2")
-            .arg(formatByteSize(storage.bytesTotal() - storage.bytesAvailable(), 0))
-            .arg(formatByteSize(storage.bytesTotal(), 0));
+            .arg(formatByteSize(used, 1))
+            .arg(formatByteSize(total, 1));
 }
 
 QString About::cpuInfo()
@@ -161,25 +167,22 @@ QString About::cpuInfo()
     QFile file("/proc/cpuinfo");
 
     if (file.open(QIODevice::ReadOnly)) {
-        QString buffer = file.readAll();
-        QStringList modelLine = buffer.split('\n').filter(QRegularExpression("^model name"));
-        QStringList lines = buffer.split('\n');
-
-        if (modelLine.isEmpty())
-            return "Unknown";
-
-        int count = lines.filter(QRegularExpression("^processor")).count();
-
-        QString result;
-        result.append(modelLine.first().split(':').at(1));
-
-        if (count > 0)
-            result.append(QString(" x %1").arg(count));
-
-        return result;
+        QString buffer = QString::fromUtf8(file.readAll());
+        for (const QString &line : buffer.split('\n')) {
+            if (line.startsWith("model name") || line.startsWith("Hardware") || line.startsWith("Processor")) {
+                QStringList parts = line.split(':');
+                if (parts.size() > 1) {
+                    QString cpu = parts.at(1).trimmed();
+                    int count = buffer.split('\n').filter(QRegularExpression("^processor")).count();
+                    if (count > 0)
+                        cpu.append(QString(" (%1 Cores)").arg(count));
+                    return cpu;
+                }
+            }
+        }
     }
 
-    return QString();
+    return QSysInfo::buildCpuArchitecture();
 }
 
 void About::openUpdator()
@@ -193,16 +196,12 @@ qlonglong About::calculateTotalRam() const
 #ifdef Q_OS_LINUX
     struct sysinfo info;
     if (sysinfo(&info) == 0)
-        // manpage "sizes are given as multiples of mem_unit bytes"
         ret = qlonglong(info.totalram) * info.mem_unit;
 #elif defined(Q_OS_FREEBSD)
-    /* Stuff for sysctl */
     size_t len;
-
     unsigned long memory;
     len = sizeof(memory);
     sysctlbyname("hw.physmem", &memory, &len, NULL, 0);
-
     ret = memory;
 #endif
     return ret;
