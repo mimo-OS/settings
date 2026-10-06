@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2024 CutefishOS Team.
  *
- * Pre-liquid glass macOS Clone Continuity & Phone Link.
+ * KDE Connect Integration Page.
  */
 
 import QtQuick 2.12
@@ -14,7 +14,7 @@ import "../"
 
 ItemPage {
     id: root
-    headerTitle: qsTr("Phone Link & Continuity")
+    headerTitle: qsTr("KDE Connect")
 
     ContinuityManager {
         id: continuity
@@ -22,7 +22,7 @@ ItemPage {
 
     FileDialog {
         id: fileDialog
-        title: qsTr("Select File to Send via AirDrop")
+        title: qsTr("Select File to Send via KDE Connect")
         onAccepted: {
             var path = selectedFile.toString()
             if (path.indexOf("file://") === 0)
@@ -52,19 +52,21 @@ ItemPage {
                     Rectangle {
                         width: 72
                         height: 120
-                        radius: 14
-                        color: "#1C1C1E"
-                        border.color: continuity.isConnected ? "#30D158" : "#48484A"
+                        radius: FishUI.Theme.mediumRadius
+                        color: FishUI.Theme.darkMode ? "#1C1C1E" : "#E5E5EA"
+                        border.color: continuity.isConnected
+                                      ? FishUI.Theme.greenColor
+                                      : (FishUI.Theme.darkMode ? "#48484A" : "#C7C7CC")
                         border.width: 2
 
                         // Screen glass
                         Rectangle {
                             anchors.fill: parent
                             anchors.margins: 4
-                            radius: 10
+                            radius: FishUI.Theme.smallRadius
                             gradient: Gradient {
-                                GradientStop { position: 0.0; color: "#2C2C2E" }
-                                GradientStop { position: 1.0; color: "#1C1C1E" }
+                                GradientStop { position: 0.0; color: FishUI.Theme.darkMode ? "#2C2C2E" : "#F2F2F7" }
+                                GradientStop { position: 1.0; color: FishUI.Theme.darkMode ? "#1C1C1E" : "#E5E5EA" }
                             }
 
                             // Dynamic Island pill
@@ -75,15 +77,15 @@ ItemPage {
                                 width: 22
                                 height: 6
                                 radius: 3
-                                color: "#000000"
+                                color: FishUI.Theme.darkMode ? "#000000" : "#8E8E93"
                             }
 
-                            // Center Apple/Glyph
+                            // Center Phone Glyph
                             Image {
                                 anchors.centerIn: parent
                                 width: 24
                                 height: 24
-                                source: "qrc:/images/sidebar/dark/phone.svg"
+                                source: "qrc:/images/sidebar/" + (FishUI.Theme.darkMode ? "dark/" : "light/") + "phone.svg"
                                 opacity: continuity.isConnected ? 0.9 : 0.4
                             }
 
@@ -95,7 +97,7 @@ ItemPage {
                                 width: 20
                                 height: 2
                                 radius: 1
-                                color: "#8E8E93"
+                                color: FishUI.Theme.disabledTextColor
                             }
                         }
                     }
@@ -109,9 +111,11 @@ ItemPage {
                             spacing: FishUI.Units.smallSpacing
 
                             Label {
-                                text: continuity.isConnected ? (continuity.deviceName.length > 0 ? continuity.deviceName : qsTr("Connected Phone")) : qsTr("No Phone Connected")
+                                text: continuity.isConnected ? (continuity.deviceName.length > 0 ? continuity.deviceName : qsTr("Connected Device")) : qsTr("No Device Connected")
+                                font.family: FishUI.Theme.fontFamily
                                 font.bold: true
                                 font.pixelSize: 20
+                                color: FishUI.Theme.textColor
                             }
 
                             // Online dot badge
@@ -119,7 +123,7 @@ ItemPage {
                                 width: 8
                                 height: 8
                                 radius: 4
-                                color: continuity.isConnected ? "#34C759" : "#8E8E93"
+                                color: continuity.isConnected ? FishUI.Theme.greenColor : FishUI.Theme.disabledTextColor
                             }
                         }
 
@@ -128,7 +132,8 @@ ItemPage {
                                   (continuity.networkType.length > 0 ? (" • " + continuity.networkType) : "") +
                                   (continuity.batteryCharge >= 0 ? (" • " + continuity.batteryCharge + "% " + qsTr("Battery")) : "") +
                                   (continuity.isCharging ? " ⚡" : ""))
-                                : qsTr("Pair an Android or iOS device using KDE Connect")
+                                : qsTr("Pair an Android, iOS, or Linux device using KDE Connect")
+                            font.family: FishUI.Theme.fontFamily
                             color: FishUI.Theme.disabledTextColor
                             font.pixelSize: 13
                         }
@@ -145,7 +150,7 @@ ItemPage {
                                 width: Math.max(8, parent.width * (Math.max(0, continuity.batteryCharge) / 100))
                                 height: parent.height
                                 radius: 5
-                                color: continuity.batteryCharge > 20 ? "#34C759" : "#FF3B30"
+                                color: continuity.batteryCharge > 20 ? FishUI.Theme.greenColor : FishUI.Theme.redColor
                             }
                         }
 
@@ -169,13 +174,13 @@ ItemPage {
 
                             Button {
                                 visible: continuity.isConnected
-                                text: qsTr("Find My Phone")
+                                text: qsTr("Ring Device")
                                 onClicked: continuity.ringPhone()
                             }
 
                             Button {
                                 visible: continuity.isConnected
-                                text: qsTr("AirDrop File")
+                                text: qsTr("Send File")
                                 onClicked: fileDialog.open()
                             }
 
@@ -195,7 +200,8 @@ ItemPage {
                 spacing: FishUI.Units.smallSpacing
 
                 Label {
-                    text: qsTr("Continuity Features")
+                    text: qsTr("Integration Features")
+                    font.family: FishUI.Theme.fontFamily
                     font.bold: true
                     color: FishUI.Theme.disabledTextColor
                     leftPadding: FishUI.Units.smallSpacing
@@ -225,8 +231,8 @@ ItemPage {
                     HorizontalDivider {}
 
                     StandardItem {
-                        title: qsTr("Show Phone in Menu Bar")
-                        subtitle: qsTr("Display phone status and quick actions in the macOS status bar")
+                        title: qsTr("Show Status in Menu Bar")
+                        subtitle: qsTr("Display phone status and quick actions in the top status bar")
                         checked: continuity.showInMenuBar
                         showSwitch: true
                         onClicked: continuity.setShowInMenuBar(!continuity.showInMenuBar)
@@ -241,6 +247,7 @@ ItemPage {
 
                 Label {
                     text: qsTr("Integration & Connection")
+                    font.family: FishUI.Theme.fontFamily
                     font.bold: true
                     color: FishUI.Theme.disabledTextColor
                     leftPadding: FishUI.Units.smallSpacing
@@ -251,7 +258,7 @@ ItemPage {
 
                     StandardItem {
                         title: qsTr("Protocol Provider")
-                        value: continuity.kdeConnectActive ? qsTr("KDE Connect D-Bus (Active)") : qsTr("Cutefish Continuity Service")
+                        value: continuity.kdeConnectActive ? qsTr("KDE Connect D-Bus (Active)") : qsTr("KDE Connect (Inactive)")
                     }
 
                     HorizontalDivider {}
@@ -261,6 +268,7 @@ ItemPage {
 
                         Label {
                             text: qsTr("Device Name")
+                            font.family: FishUI.Theme.fontFamily
                             font.pointSize: 9
                             color: FishUI.Theme.textColor
                         }
@@ -280,6 +288,7 @@ ItemPage {
 
                         Label {
                             text: qsTr("Connection State")
+                            font.family: FishUI.Theme.fontFamily
                             font.pointSize: 9
                             color: FishUI.Theme.textColor
                         }

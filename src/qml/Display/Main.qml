@@ -227,9 +227,9 @@ ItemPage {
                                 return 4;
                             }
 
-                            onCurrentIndexChanged: {
+                            onActivated: function(index) {
                                 var scales = [1.0, 1.25, 1.50, 1.75, 2.0];
-                                var value = scales[currentIndex];
+                                var value = scales[index];
                                 var output = _screenView.currentItem ? _screenView.currentItem.element : null
                                 if (output && output.scale !== value) {
                                     output.scale = value
