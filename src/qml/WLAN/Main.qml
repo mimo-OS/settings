@@ -102,52 +102,77 @@ ItemPage {
                 onClicked: newNetworkDialog.show()
             }
 
-            // Hotspot
-            // 还未完善
-//            RoundedItem {
-//                id: hotspotItem
-//                visible: handler.hotspotSupported
+            // Personal Hotspot
+            RoundedItem {
+                id: hotspotItem
 
-//                RowLayout {
-//                    Label {
-//                        text: qsTr("Hotspot")
-//                        color: FishUI.Theme.disabledTextColor
-//                    }
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: FishUI.Units.smallSpacing
 
-//                    Item {
-//                        Layout.fillWidth: true
-//                    }
+                    RowLayout {
+                        Layout.fillWidth: true
 
-//                    Switch {
-//                        Layout.fillHeight: true
-//                        rightPadding: 0
+                        Label {
+                            text: qsTr("Personal Hotspot")
+                            font.bold: true
+                            color: FishUI.Theme.textColor
+                        }
 
-//                        onToggled: {
-//                            if (checked) {
-//                                handler.createHotspot()
-//                            } else {
-//                                handler.stopHotspot()
-//                            }
-//                        }
-//                    }
-//                }
+                        Item {
+                            Layout.fillWidth: true
+                        }
 
-//                Item {
-//                    height: FishUI.Units.largeSpacing
-//                }
+                        Switch {
+                            id: hotspotSwitch
+                            Layout.alignment: Qt.AlignRight
+                            onToggled: {
+                                if (checked) {
+                                    configuration.hotspotName = ssidName.text
+                                    configuration.hotspotPassword = hotspotPassword.text
+                                    handler.createHotspot()
+                                } else {
+                                    handler.stopHotspot()
+                                }
+                            }
+                        }
+                    }
 
-//                TextField {
-//                    id: ssidName
-//                    text: configuration.hotspotName
-//                    placeholderText: qsTr("SSID")
-//                }
+                    Item { height: 4 }
 
-//                TextField {
-//                    id: hotspotPassword
-//                    placeholderText: qsTr("Password")
-//                    text: configuration.hotspotPassword
-//                }
-//            }
+                    GridLayout {
+                        Layout.fillWidth: true
+                        columns: 2
+                        columnSpacing: FishUI.Units.largeSpacing
+                        rowSpacing: FishUI.Units.smallSpacing
+
+                        Label {
+                            text: qsTr("SSID")
+                            color: FishUI.Theme.disabledTextColor
+                        }
+
+                        TextField {
+                            id: ssidName
+                            text: configuration.hotspotName.length > 0 ? configuration.hotspotName : "Cutefish-Hotspot"
+                            placeholderText: qsTr("SSID Name")
+                            Layout.fillWidth: true
+                        }
+
+                        Label {
+                            text: qsTr("Password")
+                            color: FishUI.Theme.disabledTextColor
+                        }
+
+                        TextField {
+                            id: hotspotPassword
+                            echoMode: TextInput.Password
+                            text: configuration.hotspotPassword.length > 0 ? configuration.hotspotPassword : "12345678"
+                            placeholderText: qsTr("Password")
+                            Layout.fillWidth: true
+                        }
+                    }
+                }
+            }
 
             Item {
                 height: FishUI.Units.largeSpacing

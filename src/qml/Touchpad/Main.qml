@@ -172,6 +172,33 @@ ItemPage {
                     showSwitch: true
                     checked: true
                 }
+
+                HorizontalDivider {}
+
+                StandardItem {
+                    title: qsTr("Mission Control / Overview")
+                    subtitle: qsTr("Swipe up with three fingers")
+                    showSwitch: true
+                    checked: true
+                }
+
+                HorizontalDivider {}
+
+                StandardItem {
+                    title: qsTr("Swipe between full-screen apps")
+                    subtitle: qsTr("Swipe left or right with three fingers")
+                    showSwitch: true
+                    checked: true
+                }
+
+                HorizontalDivider {}
+
+                StandardItem {
+                    title: qsTr("App Grid / Launchpad")
+                    subtitle: qsTr("Pinch with thumb and three fingers")
+                    showSwitch: true
+                    checked: true
+                }
             }
 
             Item {

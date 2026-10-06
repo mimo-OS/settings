@@ -34,13 +34,6 @@ ItemPage {
         id: background
     }
 
-    BingWallpaper {
-        id: bingWallpaper
-        onWallpaperApplied: function(path) {
-            background.path = path
-        }
-    }
-
     Scrollable {
         anchors.fill: parent
         contentHeight: layout.implicitHeight + FishUI.Units.largeSpacing * 2
@@ -50,142 +43,6 @@ ItemPage {
             width: parent.width
             spacing: FishUI.Units.largeSpacing
 
-            // SECTION: BING DAILY WALLPAPER
-            Label {
-                text: qsTr("BING DAILY WALLPAPER")
-                font.pixelSize: 11
-                font.weight: Font.DemiBold
-                color: FishUI.Theme.disabledTextColor
-                Layout.leftMargin: 4
-                Layout.topMargin: 4
-            }
-
-            // Bing Daily Wallpaper Card
-            RoundedItem {
-                Layout.fillWidth: true
-                implicitHeight: _bingCardCol.implicitHeight + FishUI.Units.largeSpacing * 2
-
-                ColumnLayout {
-                    id: _bingCardCol
-                    anchors.fill: parent
-                    anchors.margins: FishUI.Units.largeSpacing
-                    spacing: FishUI.Units.largeSpacing
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        spacing: FishUI.Units.largeSpacing
-
-                        ColumnLayout {
-                            Layout.fillWidth: true
-                            spacing: FishUI.Units.smallSpacing / 2
-
-                            Label {
-                                text: qsTr("Bing Daily Wallpaper")
-                                font.bold: true
-                                font.pixelSize: 14
-                            }
-
-                            Label {
-                                text: qsTr("Automatically refresh desktop background with Bing's daily featured photography")
-                                color: FishUI.Theme.disabledTextColor
-                                font.pixelSize: 12
-                                wrapMode: Text.WordWrap
-                                Layout.fillWidth: true
-                            }
-                        }
-
-                        Switch {
-                            checked: bingWallpaper.enabled
-                            onToggled: bingWallpaper.enabled = checked
-                        }
-                    }
-
-                    // Bing Today Info & Preview
-                    ColumnLayout {
-                        id: _bingPreviewCol
-                        Layout.fillWidth: true
-                        spacing: FishUI.Units.largeSpacing
-                        visible: bingWallpaper.enabled || bingWallpaper.localPath.length > 0 || (bingWallpaper.imageUrl && bingWallpaper.imageUrl.length > 0)
-
-                        HorizontalDivider {
-                            Layout.fillWidth: true
-                        }
-
-                        RowLayout {
-                            Layout.fillWidth: true
-                            spacing: FishUI.Units.largeSpacing * 2
-
-                            Rectangle {
-                                Layout.preferredWidth: 160
-                                Layout.preferredHeight: 90
-                                radius: 10
-                                clip: true
-                                color: FishUI.Theme.darkMode ? "#2C2C2E" : "#E5E5EA"
-                                border.width: 1 / FishUI.Dpi.ratio
-                                border.color: FishUI.Theme.darkMode ? Qt.rgba(255, 255, 255, 0.15) : Qt.rgba(0, 0, 0, 0.1)
-
-                                Image {
-                                    anchors.fill: parent
-                                    source: bingWallpaper.localPath.length > 0 ? "file://" + bingWallpaper.localPath : (bingWallpaper.imageUrl ? bingWallpaper.imageUrl : "")
-                                    fillMode: Image.PreserveAspectCrop
-                                    asynchronous: true
-                                }
-
-                                BusyIndicator {
-                                    anchors.centerIn: parent
-                                    running: bingWallpaper.isUpdating
-                                    visible: running
-                                }
-                            }
-
-                            ColumnLayout {
-                                Layout.fillWidth: true
-                                spacing: FishUI.Units.smallSpacing
-
-                                Label {
-                                    text: bingWallpaper.title ? bingWallpaper.title : qsTr("Bing Image of the Day")
-                                    font.bold: true
-                                    font.pixelSize: 13
-                                    wrapMode: Text.WordWrap
-                                    Layout.fillWidth: true
-                                }
-
-                                Label {
-                                    text: bingWallpaper.copyright ? bingWallpaper.copyright : ""
-                                    color: FishUI.Theme.disabledTextColor
-                                    font.pixelSize: 11
-                                    wrapMode: Text.WordWrap
-                                    Layout.fillWidth: true
-                                    visible: text.length > 0
-                                }
-
-                                Label {
-                                    text: bingWallpaper.statusMessage
-                                    color: "#34C759"
-                                    font.pixelSize: 11
-                                }
-
-                                RowLayout {
-                                    spacing: FishUI.Units.largeSpacing
-
-                                    Button {
-                                        text: qsTr("Update Now")
-                                        enabled: !bingWallpaper.isUpdating
-                                        onClicked: bingWallpaper.fetchToday(true)
-                                    }
-
-                                    Button {
-                                        text: qsTr("Set as Wallpaper")
-                                        enabled: bingWallpaper.localPath.length > 0
-                                        onClicked: bingWallpaper.applyAsWallpaper()
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
             // SECTION: WALLPAPERS & COLORS
             Label {
                 text: qsTr("WALLPAPERS & COLORS")
@@ -193,7 +50,7 @@ ItemPage {
                 font.weight: Font.DemiBold
                 color: FishUI.Theme.disabledTextColor
                 Layout.leftMargin: 4
-                Layout.topMargin: 8
+                Layout.topMargin: 4
             }
 
             RoundedItem {
