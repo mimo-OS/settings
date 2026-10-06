@@ -66,6 +66,15 @@ Item {
         }
 
         ListElement {
+            title: qsTr("Personal Hotspot")
+            name: "hotspot"
+            page: "qrc:/qml/Hotspot/Main.qml"
+            iconSource: "wlan.svg"
+            iconColor: "#34C759"
+            category: qsTr("Network")
+        }
+
+        ListElement {
             title: qsTr("Network")
             name: "ethernet"
             page: "qrc:/qml/Wired/Main.qml"
@@ -84,7 +93,7 @@ Item {
         }
 
         ListElement {
-            title: qsTr("Phone Link")
+            title: qsTr("KDE Connect")
             name: "phonelink"
             page: "qrc:/qml/Phone/Main.qml"
             iconSource: "phone.svg"
