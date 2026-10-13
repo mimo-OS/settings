@@ -55,6 +55,7 @@ signals:
 
 private:
     QSettings *m_dockSettings;
+    class QDBusInterface *m_iface;
     bool m_dockRoundedWindow;
 
     int m_dockIconSize;

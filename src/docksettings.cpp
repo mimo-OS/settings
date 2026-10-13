@@ -24,7 +24,11 @@
 
 DockSettings::DockSettings(QObject *parent)
     : QObject(parent)
-    , m_dockSettings(new QSettings(QSettings::UserScope, "cutefishos", "dock"))
+    , m_dockSettings(new QSettings(QSettings::UserScope, "cutefishos", "dock", this))
+    , m_iface(new QDBusInterface(QStringLiteral("com.cutefish.Dock"),
+                                 QStringLiteral("/Dock"),
+                                 QStringLiteral("com.cutefish.Dock"),
+                                 QDBusConnection::sessionBus(), this))
     , m_dockIconSize(0)
     , m_dockDirection(0)
     , m_dockVisibility(0)
@@ -45,12 +49,8 @@ int DockSettings::dockIconSize() const
 void DockSettings::setDockIconSize(int dockIconSize)
 {
     if (m_dockIconSize != dockIconSize) {
-        QDBusInterface iface("com.cutefish.Dock",
-                             "/Dock",
-                             "com.cutefish.Dock",
-                             QDBusConnection::sessionBus());
-        if (iface.isValid()) {
-            iface.call("setIconSize", dockIconSize);
+        if (m_iface->isValid()) {
+            m_iface->asyncCall(QStringLiteral("setIconSize"), dockIconSize);
         }
 
         m_dockIconSize = dockIconSize;
@@ -66,12 +66,8 @@ int DockSettings::dockDirection() const
 void DockSettings::setDockDirection(int dockDirection)
 {
     if (m_dockDirection != dockDirection) {
-        QDBusInterface iface("com.cutefish.Dock",
-                             "/Dock",
-                             "com.cutefish.Dock",
-                             QDBusConnection::sessionBus());
-        if (iface.isValid()) {
-            iface.call("setDirection", dockDirection);
+        if (m_iface->isValid()) {
+            m_iface->asyncCall(QStringLiteral("setDirection"), dockDirection);
         }
 
         m_dockDirection = dockDirection;
@@ -89,12 +85,8 @@ void DockSettings::setDockVisibility(int visibility)
     if (m_dockVisibility != visibility) {
         m_dockVisibility = visibility;
 
-        QDBusInterface iface("com.cutefish.Dock",
-                             "/Dock",
-                             "com.cutefish.Dock",
-                             QDBusConnection::sessionBus());
-        if (iface.isValid()) {
-            iface.call("setVisibility", visibility);
+        if (m_iface->isValid()) {
+            m_iface->asyncCall(QStringLiteral("setVisibility"), visibility);
         }
 
         emit dockVisibilityChanged();
