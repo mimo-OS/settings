@@ -18,6 +18,7 @@
  */
 
 import QtQuick 2.12
+import QtQuick.Window 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import FishUI 1.0 as FishUI
@@ -32,6 +33,9 @@ Item {
         Image {
             id: image
             source: "file://" + background.path
+            sourceSize: Qt.size(control.width * Screen.devicePixelRatio, control.height * Screen.devicePixelRatio)
+            fillMode: Image.PreserveAspectCrop
+            asynchronous: true
         }
     }
 

@@ -18,6 +18,7 @@
  */
 
 import QtQuick 2.12
+import QtQuick.Window 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import Qt5Compat.GraphicalEffects
@@ -139,6 +140,7 @@ ItemPage {
                                         id: _image
                                         anchors.fill: parent
                                         source: "file://" + modelData
+                                        sourceSize: Qt.size(_view.cellWidth * Screen.devicePixelRatio, _view.cellHeight * Screen.devicePixelRatio)
                                         fillMode: Image.PreserveAspectCrop
                                         asynchronous: true
                                         smooth: true
