@@ -105,7 +105,7 @@ QVariantList BatteryHistoryModel::asPoints() const
 {
     QVariantList points;
     points.reserve(m_values.count());
-    foreach (const HistoryReply &h, m_values) {
+    for (const HistoryReply &h : std::as_const(m_values)) {
         points.append(QPointF(h.time, h.value));
     }
 
@@ -141,14 +141,10 @@ int BatteryHistoryModel::lastDataPointTime() const
 
 int BatteryHistoryModel::largestValue() const
 {
-    if (m_values.isEmpty()) {
-        return 0;
-    }
-
-    int max = 0; // TODO std::max or something?
-    for (auto it = m_values.constBegin(), end = m_values.constEnd(); it != end; ++it) {
-        if ((*it).value > max) {
-            max = (*it).value;
+    int max = 0;
+    for (const HistoryReply &h : std::as_const(m_values)) {
+        if (h.value > max) {
+            max = h.value;
         }
     }
     return max;
@@ -191,9 +187,11 @@ void BatteryHistoryModel::load()
             return;
         }
 
-        foreach (const HistoryReply &r, reply.value()) {
-            if (r.value > 0) { //we get back some values which contain no value, possibly to indicate if charging changes, ignore them
-                m_values.prepend(r);
+        const auto replies = reply.value();
+        m_values.reserve(replies.size());
+        for (auto it = replies.crbegin(); it != replies.crend(); ++it) {
+            if (it->value > 0) {
+                m_values.append(*it);
             }
         }
 
