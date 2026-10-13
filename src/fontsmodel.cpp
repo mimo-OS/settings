@@ -25,12 +25,12 @@
 #include <QTimer>
 #include <QDir>
 #include <QDirIterator>
+#include <QSet>
 
 // Freetype and Fontconfig
 #include <ft2build.h>
 #include <freetype/freetype.h>
 #include <fontconfig/fontconfig.h>
-#include <ft2build.h>
 
 static QString getFcString(FcPattern *pat, const char *val, int index)
 {
@@ -102,6 +102,10 @@ void FontsModel::run()
          return;
     }
 
+    const QString lanPrefix = m_lanCode.section(QLatin1Char('-'), 0, 0);
+    QSet<QString> seenFixed;
+    QSet<QString> seenGeneral;
+
     for (int i = 0; i < fs->nfont; ++i) {
          char *charset = (char*)FcPatternFormat(fs->fonts[i], (FcChar8*)"%{charset}");
 
@@ -112,7 +116,13 @@ void FontsModel::run()
          free(charset);
 
          QString family = getFcLangString(fs->fonts[i], FC_FAMILY, FC_FAMILYLANG);
-         QString language = (char*)FcPatternFormat(fs->fonts[i], (FcChar8*)"%{lang}");
+
+         char *langStr = (char*)FcPatternFormat(fs->fonts[i], (FcChar8*)"%{lang}");
+         QString language;
+         if (langStr) {
+             language = QString::fromUtf8(langStr);
+             free(langStr);
+         }
 
          int spacing = FC_PROPORTIONAL;
          if (FcPatternGetInteger(fs->fonts[i], FC_SPACING, 0, &spacing) != FcResultMatch)
@@ -122,13 +132,18 @@ void FontsModel::run()
          if (family.isEmpty())
              continue;
 
-         if (fixedPitch && !m_fixedFonts.contains(family)) {
-             m_fixedFonts.append(family);
+         if (fixedPitch) {
+             if (!seenFixed.contains(family)) {
+                 seenFixed.insert(family);
+                 m_fixedFonts.append(family);
+             }
          } else {
-             if (!m_generalFonts.contains(family)
+             if (!seenGeneral.contains(family)
                      && (language.contains(m_lanCode, Qt::CaseInsensitive) ||
-                         language.contains(m_lanCode.split('-').first(), Qt::CaseInsensitive)))
+                         (!lanPrefix.isEmpty() && language.contains(lanPrefix, Qt::CaseInsensitive)))) {
+                 seenGeneral.insert(family);
                  m_generalFonts.append(family);
+             }
          }
     }
     FcFontSetDestroy(fs);
