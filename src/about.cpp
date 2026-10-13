@@ -164,25 +164,39 @@ QString About::internalStorage()
 
 QString About::cpuInfo()
 {
-    QFile file("/proc/cpuinfo");
+    static QString cachedCpuInfo;
+    if (!cachedCpuInfo.isEmpty())
+        return cachedCpuInfo;
 
-    if (file.open(QIODevice::ReadOnly)) {
-        QString buffer = QString::fromUtf8(file.readAll());
-        for (const QString &line : buffer.split('\n')) {
-            if (line.startsWith("model name") || line.startsWith("Hardware") || line.startsWith("Processor")) {
-                QStringList parts = line.split(':');
-                if (parts.size() > 1) {
-                    QString cpu = parts.at(1).trimmed();
-                    int count = buffer.split('\n').filter(QRegularExpression("^processor")).count();
-                    if (count > 0)
-                        cpu.append(QString(" (%1 Cores)").arg(count));
-                    return cpu;
+    QFile file(QStringLiteral("/proc/cpuinfo"));
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QString modelName;
+        int coreCount = 0;
+        QTextStream in(&file);
+        while (!in.atEnd()) {
+            const QString line = in.readLine();
+            if (line.startsWith(QLatin1String("processor"))) {
+                ++coreCount;
+            } else if (modelName.isEmpty() &&
+                       (line.startsWith(QLatin1String("model name")) ||
+                        line.startsWith(QLatin1String("Hardware")) ||
+                        line.startsWith(QLatin1String("Processor")))) {
+                int colonIdx = line.indexOf(QLatin1Char(':'));
+                if (colonIdx != -1) {
+                    modelName = line.mid(colonIdx + 1).trimmed();
                 }
             }
         }
+        if (!modelName.isEmpty()) {
+            if (coreCount > 0)
+                modelName.append(QStringLiteral(" (%1 Cores)").arg(coreCount));
+            cachedCpuInfo = modelName;
+            return cachedCpuInfo;
+        }
     }
 
-    return QSysInfo::buildCpuArchitecture();
+    cachedCpuInfo = QSysInfo::buildCpuArchitecture();
+    return cachedCpuInfo;
 }
 
 void About::openUpdator()
