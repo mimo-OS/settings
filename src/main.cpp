@@ -20,9 +20,28 @@
 #include "application.h"
 #include <QDebug>
 #include <QIcon>
+#include <QFile>
+
+#ifdef __GLIBC__
+#include <malloc.h>
+#endif
 
 int main(int argc, char *argv[])
 {
+#ifdef __GLIBC__
+    mallopt(M_ARENA_MAX, 2);
+    mallopt(M_TRIM_THRESHOLD, 128 * 1024);
+    mallopt(M_MMAP_THRESHOLD, 64 * 1024);
+#endif
+
+    // Dynamic EGL vendor selection to prevent NVIDIA driver bloat on Intel/AMD GPUs
+    if (!QFile::exists(QStringLiteral("/dev/nvidia0")) &&
+        QFile::exists(QStringLiteral("/usr/share/glvnd/egl_vendor.d/50_mesa.json"))) {
+        qputenv("__EGL_VENDOR_LIBRARY_FILENAMES", "/usr/share/glvnd/egl_vendor.d/50_mesa.json");
+    }
+
+    qputenv("QSG_RENDER_LOOP", "basic");
+
     Application app(argc, argv);
 
     app.setWindowIcon(QIcon::fromTheme("cutefish-settings"));

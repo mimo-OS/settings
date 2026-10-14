@@ -5,6 +5,9 @@
 #include <QLocale>
 #include <QIcon>
 #include <QPixmapCache>
+#ifdef __GLIBC__
+#include <malloc.h>
+#endif
 
 #include "settingsuiadaptor.h"
 #include "fontsmodel.h"
@@ -112,6 +115,22 @@ Application::Application(int &argc, char **argv)
 
     m_engine.addImportPath(QStringLiteral("qrc:/"));
     m_engine.load(QUrl(QStringLiteral("qrc:/qml/main.qml")));
+
+    // Trim freed memory after startup and periodically
+    QTimer::singleShot(2000, []() {
+#ifdef __GLIBC__
+        malloc_trim(0);
+#endif
+    });
+
+    QTimer *trimTimer = new QTimer(this);
+    trimTimer->setInterval(45000);
+    connect(trimTimer, &QTimer::timeout, this, []() {
+#ifdef __GLIBC__
+        malloc_trim(0);
+#endif
+    });
+    trimTimer->start();
 
     if (!module.isEmpty()) {
         QTimer::singleShot(0, this, [this, module]() {
