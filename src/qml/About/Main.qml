@@ -70,6 +70,8 @@ ItemPage {
 
             // System Specifications Card
             RoundedItem {
+                spacing: 0
+
                 StandardItem {
                     key: qsTr("Processor")
                     value: about.cpuInfo

@@ -25,6 +25,14 @@ Item {
     property bool checked: false
     property var control: null
 
+    property bool clickable: rootItem.showChevron || rootItem.showSwitch
+    property bool isFirst: false
+    property bool isLast: false
+    property real cornerRadius: 8
+    property bool showDivider: false
+    property real dividerInset: 0
+    property color dividerColor: FishUI.Theme.glassBorderColor
+
     signal clicked()
 
     Layout.fillWidth: true
@@ -32,17 +40,44 @@ Item {
     Rectangle {
         id: background
         anchors.fill: parent
-        color: itemMouse.containsMouse && (rootItem.showChevron || rootItem.showSwitch)
-               ? (FishUI.Theme.darkMode ? Qt.rgba(1, 1, 1, 0.05) : Qt.rgba(0, 0, 0, 0.03))
-               : "transparent"
-        radius: 6
+        color: {
+            if (!itemMouse.enabled)
+                return "transparent"
+            if (itemMouse.pressed)
+                return FishUI.Theme.darkMode ? Qt.rgba(1, 1, 1, 0.08) : Qt.rgba(0, 0, 0, 0.06)
+            if (itemMouse.containsMouse)
+                return FishUI.Theme.darkMode ? Qt.rgba(1, 1, 1, 0.05) : Qt.rgba(0, 0, 0, 0.03)
+            return "transparent"
+        }
+        topLeftRadius: isFirst ? cornerRadius : 6
+        topRightRadius: isFirst ? cornerRadius : 6
+        bottomLeftRadius: isLast ? cornerRadius : 6
+        bottomRightRadius: isLast ? cornerRadius : 6
+
+        Behavior on color {
+            ColorAnimation {
+                duration: 120
+                easing.type: Easing.OutCubic
+            }
+        }
+    }
+
+    Rectangle {
+        id: bottomDivider
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.leftMargin: rootItem.dividerInset
+        height: 1
+        visible: rootItem.showDivider
+        color: rootItem.dividerColor
     }
 
     MouseArea {
         id: itemMouse
         anchors.fill: parent
-        hoverEnabled: rootItem.showChevron || rootItem.showSwitch
-        enabled: rootItem.showChevron || rootItem.showSwitch
+        hoverEnabled: rootItem.clickable
+        enabled: rootItem.clickable
         onClicked: {
             if (rootItem.showSwitch) {
                 switchControl.checked = !switchControl.checked

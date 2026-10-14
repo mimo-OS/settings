@@ -13,8 +13,22 @@ Item {
     height: 1
     Layout.fillWidth: true
 
+    property real leftInset: 0
+    property real rightInset: 0
+    property color color: FishUI.Theme.glassBorderColor
+
     Rectangle {
         anchors.fill: parent
-        color: FishUI.Theme.darkMode ? Qt.rgba(1, 1, 1, 0.07) : Qt.rgba(0, 0, 0, 0.06)
+        anchors.leftMargin: control.leftInset
+        anchors.rightMargin: control.rightInset
+        color: control.color
+
+        Behavior on color {
+            ColorAnimation {
+                duration: 150
+                easing.type: Easing.Linear
+            }
+        }
     }
 }
+

@@ -59,7 +59,8 @@ FishUI.Window {
         }
     }
 
-    background.opacity: FishUI.Theme.blurEnabled ? (FishUI.Theme.darkMode ? 0.8 : 0.6) : 1
+    background.color: "transparent"
+    background.opacity: 1
     header.height: 40
     contentTopMargin: 0
 
@@ -95,24 +96,33 @@ FishUI.Window {
         }
 
         // macOS Content Detail Pane
-        StackView {
-            id: _stackView
+        Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            initialItem: Qt.resolvedUrl(sideBar.model.get(0).page)
-            clip: true
 
-            pushEnter: Transition {
-                NumberAnimation { property: "opacity"; from: 0.6; to: 1.0; duration: 150; easing.type: Easing.OutQuad }
+            Rectangle {
+                anchors.fill: parent
+                color: FishUI.Theme.darkMode ? "#1C1C1E" : "#F5F5F7"
             }
-            pushExit: Transition {
-                NumberAnimation { property: "opacity"; from: 1.0; to: 0.6; duration: 150; easing.type: Easing.OutQuad }
-            }
-            replaceEnter: Transition {
-                NumberAnimation { property: "opacity"; from: 0.6; to: 1.0; duration: 150; easing.type: Easing.OutQuad }
-            }
-            replaceExit: Transition {
-                NumberAnimation { property: "opacity"; from: 1.0; to: 0.6; duration: 150; easing.type: Easing.OutQuad }
+
+            StackView {
+                id: _stackView
+                anchors.fill: parent
+                initialItem: Qt.resolvedUrl(sideBar.model.get(0).page)
+                clip: true
+
+                pushEnter: Transition {
+                    NumberAnimation { property: "opacity"; from: 0.6; to: 1.0; duration: 150; easing.type: Easing.OutQuad }
+                }
+                pushExit: Transition {
+                    NumberAnimation { property: "opacity"; from: 1.0; to: 0.6; duration: 150; easing.type: Easing.OutQuad }
+                }
+                replaceEnter: Transition {
+                    NumberAnimation { property: "opacity"; from: 0.6; to: 1.0; duration: 150; easing.type: Easing.OutQuad }
+                }
+                replaceExit: Transition {
+                    NumberAnimation { property: "opacity"; from: 1.0; to: 0.6; duration: 150; easing.type: Easing.OutQuad }
+                }
             }
         }
     }

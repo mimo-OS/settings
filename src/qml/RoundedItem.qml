@@ -16,12 +16,15 @@ Rectangle {
     property alias spacing: _mainLayout.spacing
     property alias layout: _mainLayout
 
-    color: FishUI.Theme.darkMode ? "#28282A" : "#FFFFFF"
-    radius: 10
+    property real horizontalPadding: 16
+    property real verticalPadding: 10
+
+    color: FishUI.Theme.secondBackgroundColor
+    radius: FishUI.Theme.mediumRadius
     antialiasing: true
 
     border.width: 1 / FishUI.Dpi.ratio
-    border.color: FishUI.Theme.darkMode ? Qt.rgba(1, 1, 1, 0.08) : Qt.rgba(0, 0, 0, 0.06)
+    border.color: FishUI.Theme.glassBorderColor
 
     Behavior on color {
         ColorAnimation {
@@ -37,10 +40,10 @@ Rectangle {
     ColumnLayout {
         id: _mainLayout
         anchors.fill: parent
-        anchors.leftMargin: 16
-        anchors.rightMargin: 16
-        anchors.topMargin: 10
-        anchors.bottomMargin: 10
+        anchors.leftMargin: cardRoot.horizontalPadding
+        anchors.rightMargin: cardRoot.horizontalPadding
+        anchors.topMargin: cardRoot.verticalPadding
+        anchors.bottomMargin: cardRoot.verticalPadding
         spacing: 8
     }
 }

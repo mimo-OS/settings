@@ -41,13 +41,12 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        color: FishUI.Theme.darkMode ? Qt.lighter(FishUI.Theme.backgroundColor, 1.3)
-                                     : Qt.darker(FishUI.Theme.backgroundColor, 1.04)
-        opacity: 0.85
+        color: FishUI.Theme.darkMode ? "#1A1B26" : "#E1E2E7"
+        opacity: FishUI.Theme.blurEnabled ? 0.85 : 1.0
 
         Behavior on color {
             ColorAnimation {
-                duration: 250
+                duration: 200
                 easing.type: Easing.Linear
             }
         }
@@ -496,11 +495,6 @@ Item {
                         Layout.alignment: Qt.AlignVCenter
                         radius: 6
                         color: model.iconColor
-
-                        gradient: Gradient {
-                            GradientStop { position: 0.0; color: Qt.lighter(model.iconColor, 1.15) }
-                            GradientStop { position: 1.0; color: model.iconColor }
-                        }
 
                         Image {
                             id: icon
