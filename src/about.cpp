@@ -77,27 +77,31 @@ About::About(QObject *parent)
 
 bool About::isCutefishOS()
 {
-    if (QFile::exists("/etc/cutefishos") || QFile::exists("/etc/cutefish"))
-        return true;
     return true;
 }
 
 QString About::version()
 {
+    if (QFile::exists("/etc/mimo")) {
+        QSettings settings("/etc/mimo", QSettings::IniFormat);
+        QString v = settings.value("Version").toString();
+        if (!v.isEmpty())
+            return v;
+    }
     if (QFile::exists("/etc/cutefish")) {
         QSettings settings("/etc/cutefish", QSettings::IniFormat);
         QString v = settings.value("Version").toString();
         if (!v.isEmpty())
             return v;
     }
-    return QStringLiteral("1.0.0 (Sequoia Edition)");
+    return QStringLiteral("1.0 (Cloud Edition)");
 }
 
 QString About::osName()
 {
     QString name = QSysInfo::prettyProductName();
-    if (name.isEmpty() || name == "Unknown") {
-        name = QStringLiteral("CutefishOS GNU/Linux");
+    if (name.isEmpty() || name == "Unknown" || name.contains("Cutefish", Qt::CaseInsensitive)) {
+        name = QStringLiteral("mimo OS");
     }
     return name;
 }
@@ -202,6 +206,16 @@ QString About::cpuInfo()
 void About::openUpdator()
 {
     QProcess::startDetached("cutefish-updator", QStringList());
+}
+
+QString About::acknowledgements()
+{
+    return QStringLiteral("mimo OS is lovingly crafted upon the foundations of CutefishOS, KDE KWin, Qt 6, and the global open-source community.");
+}
+
+QString About::licenseName()
+{
+    return QStringLiteral("GNU General Public License v3.0 (GPLv3)");
 }
 
 qlonglong About::calculateTotalRam() const

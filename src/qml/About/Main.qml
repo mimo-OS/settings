@@ -62,6 +62,13 @@ ItemPage {
                     font.pointSize: 9.5
                     color: FishUI.Theme.disabledTextColor
                 }
+
+                Label {
+                    Layout.alignment: Qt.AlignHCenter
+                    text: qsTr("Light, gentle, and modern desktop experience ☁️")
+                    font.pointSize: 8.5
+                    color: FishUI.Theme.disabledTextColor
+                }
             }
 
             Item {
@@ -205,6 +212,53 @@ ItemPage {
                     showChevron: true
                     onClicked: {
                         rootWindow.switchPageFromName("update")
+                    }
+                }
+            }
+
+            // Open Source Credits & Acknowledgements Card
+            RoundedItem {
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 10
+
+                    RowLayout {
+                        spacing: 8
+                        Label {
+                            text: "☁️"
+                            font.pixelSize: 18
+                        }
+                        Label {
+                            text: qsTr("Open Source Acknowledgements & Credits")
+                            font.bold: true
+                            font.pointSize: 10
+                            color: FishUI.Theme.textColor
+                        }
+                    }
+
+                    Label {
+                        Layout.fillWidth: true
+                        wrapMode: Text.WordWrap
+                        text: about.acknowledgements
+                        font.pointSize: 8.5
+                        lineHeight: 1.2
+                        color: FishUI.Theme.disabledTextColor
+                    }
+
+                    HorizontalDivider {}
+
+                    StandardItem {
+                        title: qsTr("Original Upstream Project")
+                        subtitle: "CutefishOS Team & Contributors"
+                        value: "GPLv3"
+                    }
+
+                    HorizontalDivider {}
+
+                    StandardItem {
+                        title: qsTr("Desktop License")
+                        subtitle: qsTr("Free & Open Source Software")
+                        value: about.licenseName
                     }
                 }
             }

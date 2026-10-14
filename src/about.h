@@ -39,6 +39,8 @@ class About : public QObject
     Q_PROPERTY(QString prettyProductName READ prettyProductName CONSTANT)
     Q_PROPERTY(QString internalStorage READ internalStorage CONSTANT)
     Q_PROPERTY(QString cpuInfo READ cpuInfo CONSTANT)
+    Q_PROPERTY(QString acknowledgements READ acknowledgements CONSTANT)
+    Q_PROPERTY(QString licenseName READ licenseName CONSTANT)
 
 public:
     explicit About(QObject *parent = nullptr);
@@ -58,6 +60,8 @@ public:
     QString prettyProductName();
     QString internalStorage();
     QString cpuInfo();
+    QString acknowledgements();
+    QString licenseName();
 
     Q_INVOKABLE void openUpdator();
 
