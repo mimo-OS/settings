@@ -51,7 +51,7 @@ Application::Application(int &argc, char **argv)
     setOrganizationName("cutefishos");
 
     QCommandLineParser parser;
-    parser.setApplicationDescription(QStringLiteral("Cutefish Settings"));
+    parser.setApplicationDescription(QStringLiteral("mimo OS Settings"));
     parser.addHelpOption();
 
     QCommandLineOption moduleOption("m", "Switch to module", "module");

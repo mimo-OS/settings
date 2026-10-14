@@ -1,6 +1,8 @@
 [Desktop Entry]
 Name=System Settings
 Name[zh_CN]=系统设置
+GenericName=mimo OS Settings
+Comment=System Settings for mimo OS
 Exec=/usr/bin/cutefish-settings
 Icon=preferences-system
 Terminal=false
