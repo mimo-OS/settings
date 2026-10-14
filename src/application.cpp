@@ -4,6 +4,7 @@
 #include <QTranslator>
 #include <QLocale>
 #include <QIcon>
+#include <QPixmapCache>
 
 #include "settingsuiadaptor.h"
 #include "fontsmodel.h"
@@ -42,6 +43,7 @@ static QObject *passwordSingleton(QQmlEngine *engine, QJSEngine *scriptEngine)
 Application::Application(int &argc, char **argv)
     : QApplication(argc, argv)
 {
+    QPixmapCache::setCacheLimit(2048);
     setWindowIcon(QIcon::fromTheme("preferences-system"));
     setOrganizationName("cutefishos");
 
